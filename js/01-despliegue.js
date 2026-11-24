@@ -1,6 +1,6 @@
 /* ==========================================================================
    Script para Entregable 01: Documentación del Despliegue
-   Sincroniza navegación suave y resaltado de sección activa en el índice lateral
+   Sincroniza navegación suave, resaltado de sección y estado de checklist
    ========================================================================== */
 (function () {
     "use strict";
@@ -14,8 +14,6 @@
             })
             .filter(Boolean);
 
-        if (!navLinks.length || !sections.length) return;
-
         function setActiveSection(sectionId) {
             navLinks.forEach((link) => {
                 const isMatch = link.getAttribute("href") === "#" + sectionId;
@@ -24,42 +22,71 @@
             });
         }
 
-        const initialHash = window.location.hash ? window.location.hash.slice(1) : "";
-        if (initialHash && document.getElementById(initialHash)) {
-            setActiveSection(initialHash);
+        if (navLinks.length && sections.length) {
+            const initialHash = window.location.hash ? window.location.hash.slice(1) : "";
+            if (initialHash && document.getElementById(initialHash)) {
+                setActiveSection(initialHash);
+            }
+
+            navLinks.forEach((link) => {
+                link.addEventListener("click", function (event) {
+                    const targetId = this.getAttribute("href").slice(1);
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        event.preventDefault();
+                        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                        setActiveSection(targetId);
+                        if (history.replaceState) {
+                            history.replaceState(null, "", "#" + targetId);
+                        }
+                    }
+                });
+            });
+
+            if ("IntersectionObserver" in window) {
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        const visible = entries
+                            .filter((entry) => entry.isIntersecting)
+                            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+                        if (visible.length > 0) {
+                            setActiveSection(visible[0].target.id);
+                        }
+                    },
+                    {
+                        rootMargin: "-18% 0px -65% 0px",
+                        threshold: [0, 0.1],
+                    }
+                );
+                sections.forEach((section) => observer.observe(section));
+            }
         }
 
-        navLinks.forEach((link) => {
-            link.addEventListener("click", function (event) {
-                const targetId = this.getAttribute("href").slice(1);
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) {
-                    event.preventDefault();
-                    targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-                    setActiveSection(targetId);
-                    if (history.replaceState) {
-                        history.replaceState(null, "", "#" + targetId);
-                    }
-                }
-            });
-        });
+        const checkboxes = Array.from(document.querySelectorAll("#deployChecklist input[type='checkbox']"));
+        const storageKey = "stockvelia_deploy_checklist_v1";
 
-        if ("IntersectionObserver" in window) {
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    const visible = entries
-                        .filter((entry) => entry.isIntersecting)
-                        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-                    if (visible.length > 0) {
-                        setActiveSection(visible[0].target.id);
+        if (checkboxes.length) {
+            try {
+                const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+                checkboxes.forEach((box, idx) => {
+                    if (Object.prototype.hasOwnProperty.call(saved, idx)) {
+                        box.checked = Boolean(saved[idx]);
                     }
-                },
-                {
-                    rootMargin: "-18% 0px -65% 0px",
-                    threshold: [0, 0.1],
-                }
-            );
-            sections.forEach((section) => observer.observe(section));
+                    box.addEventListener("change", () => {
+                        const nextState = {};
+                        checkboxes.forEach((cb, i) => {
+                            nextState[i] = cb.checked;
+                        });
+                        try {
+                            localStorage.setItem(storageKey, JSON.stringify(nextState));
+                        } catch (_) {
+                            /* Ignorar si el almacenamiento local no está disponible */
+                        }
+                    });
+                });
+            } catch (_) {
+                /* Ignorar errores de parseo de localStorage */
+            }
         }
     });
 })();

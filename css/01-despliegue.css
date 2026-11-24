@@ -12,6 +12,8 @@
     --dep-muted: #665b73;
     --dep-surface: #ffffff;
     --dep-surface-alt: #f8f8fc;
+    --dep-code-bg: #1e1b2e;
+    --dep-code-text: #f3e8ff;
 }
 
 .doc-meta-strip {
@@ -59,6 +61,27 @@
 
 .deploy-list li {
     margin-bottom: 10px;
+}
+
+.code-block {
+    margin: 12px 0 16px;
+    padding: 13px 15px;
+    border-radius: 10px;
+    background-color: var(--dep-code-bg);
+    color: var(--dep-code-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: clamp(0.78rem, 1.35vw, 0.85rem);
+    line-height: 1.55;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    border: 1px solid rgba(94, 5, 157, 0.28);
+}
+
+.code-block code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
 }
 
 .table-wrap {
@@ -119,13 +142,48 @@
 }
 
 .status-ok {
-    background-color: #ede9fe;
-    color: var(--dep-primary-dark);
+    background-color: #dcfce7;
+    color: #166534;
 }
 
 .status-warn {
     background-color: #fef3c7;
     color: #92400e;
+}
+
+.checklist-interactive {
+    list-style: none;
+    margin: 12px 0 18px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checklist-interactive li {
+    background-color: var(--dep-surface-alt);
+    border: 1px solid var(--dep-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: clamp(0.86rem, 1.4vw, 0.92rem);
+    color: var(--dep-text);
+}
+
+.checklist-interactive label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.checklist-interactive input[type="checkbox"] {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--dep-primary);
+    flex-shrink: 0;
+    cursor: pointer;
 }
 
 .deploy-note {
@@ -171,6 +229,10 @@
     .deploy-table th,
     .deploy-table td {
         padding: 10px 11px;
+    }
+
+    .code-block {
+        padding: 11px 12px;
     }
 
     .deploy-note {
