@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>04. Plan de respaldo — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/04-plan-respaldo.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 04 • Continuidad operativa y recuperación ante desastres</span>
+            <h1>Plan de respaldo y recuperación de StockVelia</h1>
+            <p class="doc-subtitle">
+                Lineamientos de copia de seguridad, retención, restauración y contingencia para la base de datos
+                PostgreSQL, archivos de perfil/avatar y configuración del sistema multi-empresa.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia Multi-Empresa</span>
+                <span class="meta-pill">BD Crítica: PostgreSQL (Stock, Movimientos, Auditoría)</span>
+                <span class="meta-pill">Archivos: Avatares y Configuración</span>
+                <span class="meta-pill">Actualización: 23 de noviembre de 2026</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Navegación del plan de respaldo">
+                <h2>Secciones</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Alcance y activos críticos</a></li>
+                    <li><a href="#sec-2">2. Objetivos RPO / RTO y frecuencia</a></li>
+                    <li><a href="#sec-3">3. Procedimientos de respaldo</a></li>
+                    <li><a href="#sec-4">4. Procedimientos de restauración</a></li>
+                    <li><a href="#sec-5">5. Verificación, seguridad y riesgos</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Alcance y clasificación de activos críticos</h2>
+                    <p>
+                        El plan de respaldo de <strong>StockVelia</strong> protege la información operativa, contable de
+                        inventario y de seguridad de todas las empresas registradas en la plataforma, garantizando que
+                        el
+                        borrado lógico (<code>estado = 'INACTIVO'</code> en productos y
+                        <code>estado = 'ELIMINADO'</code> en usuarios), la revocación de sesiones
+                        (<code>tokens_blacklist</code>) y el historial de <code>movimientos_inventario</code> y
+                        <code>auditoria</code> puedan recuperarse sin inconsistencias.
+                    </p>
+                    <div class="table-wrap">
+                        <table class="backup-table">
+                            <thead>
+                                <tr>
+                                    <th>Activo / Dominio</th>
+                                    <th>Criticidad</th>
+                                    <th>Componentes incluidos en el respaldo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Base de datos transaccional PostgreSQL</strong></td>
+                                    <td><span class="badge-crit">Crítica</span></td>
+                                    <td>
+                                        Tablas <code>roles</code>, <code>empresa</code>, <code>usuario</code>,
+                                        <code>usuario_empresa</code>, <code>categorias</code>, <code>productos</code>,
+                                        <code>movimientos_inventario</code>, <code>codigos_recuperacion</code>,
+                                        <code>tokens_blacklist</code> y <code>auditoria</code>, además de funciones,
+                                        restricciones <code>CHECK</code> y el trigger
+                                        <code>trg_actualizar_stock</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Archivos de usuario y medios</strong></td>
+                                    <td><span class="badge-med">Media</span></td>
+                                    <td>
+                                        Fotografías/avatares cargados vía <code>POST /api/usuarios/perfil/foto</code>
+                                        (JPG, JPEG, PNG y WEBP hasta 2 MB), manteniendo coherencia con las rutas
+                                        almacenadas en el perfil de cada usuario.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Configuración y código fuente</strong></td>
+                                    <td><span class="badge-high">Alta</span></td>
+                                    <td>
+                                        Repositorio de Backend (Node.js/Express), Frontend (React) y plantillas de
+                                        configuración/entorno (sin exponer secretos en claro dentro de respaldos no
+                                        cifrados).
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Objetivos RPO / RTO, periodicidad y retención</h2>
+                    <p>
+                        Los objetivos de punto de recuperación (<strong>RPO</strong>) y tiempo de recuperación
+                        (<strong>RTO</strong>) se definen según el impacto operativo de cada componente:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="backup-table">
+                            <thead>
+                                <tr>
+                                    <th>Activo</th>
+                                    <th>RPO objetivo</th>
+                                    <th>RTO objetivo</th>
+                                    <th>Frecuencia de respaldo y retención sugerida</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Base de datos PostgreSQL</strong></td>
+                                    <td>&lt;= 24 h (o menor con WAL/incrementales)</td>
+                                    <td>&lt;= 2 horas</td>
+                                    <td>
+                                        Respaldo lógico diario automatizado (<code>pg_dump</code>) con retención mínima
+                                        de 7 copias diarias, 4 semanales y 3 mensuales.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Archivos de avatar / adjuntos</strong></td>
+                                    <td>&lt;= 24 horas</td>
+                                    <td>&lt;= 2 horas</td>
+                                    <td>
+                                        Copia sincronizada diaria del directorio de uploads junto con el respaldo diario
+                                        de aplicación/BD, reteniendo 14 días.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Código y configuración</strong></td>
+                                    <td>Inmediato (por commit / release)</td>
+                                    <td>&lt;= 1 hora</td>
+                                    <td>
+                                        Control de versiones en Git y respaldo de configuración cifrada en cada
+                                        liberación o cambio de infraestructura.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Procedimientos de respaldo</h2>
+                    <p>
+                        Pasos operativos estándar para generar copias consistentes sin interrumpir el servicio ni
+                        comprometer la integridad de stock:
+                    </p>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Respaldo lógico de PostgreSQL:</strong> Ejecutar <code>pg_dump</code> en formato
+                            personalizado (<code>-Fc</code>) o SQL con transacción consistente para capturar esquema,
+                            trigger <code>trg_actualizar_stock</code>, restricciones y datos de todas las empresas.
+                        </li>
+                        <li>
+                            <strong>Empaquetado de archivos de perfil:</strong> Archivar de forma periódica la carpeta
+                            de imágenes de perfil de usuarios, evitando archivos residuales tras el reemplazo de avatar
+                            en <code>POST /api/usuarios/perfil/foto</code>.
+                        </li>
+                        <li>
+                            <strong>Aislamiento y almacenamiento externo:</strong> Transferir cada copia a una ubicación
+                            distinta al servidor principal (almacenamiento en nube o equipo externo) y verificar que el
+                            archivo resultante no esté vacío ni corrupto.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Procedimientos de restauración y contingencia</h2>
+                    <p>
+                        Secuencia de actuación ante corrupción de datos, error humano masivo o caída de instancia:
+                    </p>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>1. Contención y diagnóstico:</strong> Pausar escrituras o aislar el tráfico hacia la
+                            instancia afectada si existe corrupción de datos, identificando la fecha/hora exacta del
+                            incidente y el respaldo íntegro más cercano.
+                        </li>
+                        <li>
+                            <strong>2. Restauración en entorno aislado o de recuperación:</strong> Restaurar el volcado
+                            de PostgreSQL (<code>pg_restore</code>) y los archivos de avatar correspondientes,
+                            verificando que los roles (<code>1</code>, <code>2</code>, <code>3</code>), empresas,
+                            productos y <code>movimientos_inventario</code> queden consistentes.
+                        </li>
+                        <li>
+                            <strong>3. Validación de integridad de stock y sesiones:</strong> Comprobar que el
+                            <code>stock</code> de los productos coincida con los movimientos registrados y que el
+                            estado de usuarios (<code>ACTIVO</code>, <code>INACTIVO</code>, <code>ELIMINADO</code>) y
+                            bloqueos temporales no presenten inconsistencias.
+                        </li>
+                        <li>
+                            <strong>4. Reanudación y registro en auditoría:</strong> Habilitar nuevamente el acceso de
+                            usuarios, notificar al equipo responsable y registrar el evento de
+                            contingencia/recuperación.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Pruebas de restauración, seguridad y riesgos</h2>
+                    <p>
+                        Controles periódicos para asegurar que las copias de respaldo sean confiables cuando se
+                        necesiten:
+                    </p>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Simulacros de restauración:</strong> Ejecutar al menos una prueba de restauración en
+                            un entorno de pruebas (staging/local) para confirmar que el respaldo levanta sin errores de
+                            permisos, extensiones ni dependencias.
+                        </li>
+                        <li>
+                            <strong>Cifrado y control de acceso a respaldos:</strong> Proteger los archivos de respaldo
+                            y variables sensibles (<code>JWT_SECRET</code>, credenciales de BD y correo SMTP)
+                            mediante cifrado y acceso restringido exclusivamente a personal autorizado.
+                        </li>
+                    </ul>
+                    <div class="callout-note">
+                        <strong>Riesgo operativo a considerar:</strong> Restaurar una base de datos de un punto
+                        anterior sobrescribe movimientos recientes y estados de sesión/tokens posteriores a ese
+                        instante; por ello, siempre debe comunicarse el corte temporal a los Propietarios y
+                        Administradores Operativos de las empresas afectadas.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 04: Plan de respaldo</div>
+    </footer>
+
+    <script src="../js/04-plan-respaldo.js"></script>
+</body>
+
+</html>

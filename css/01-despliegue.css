@@ -1,0 +1,179 @@
+/* ==========================================================================
+   Estilos específicos para Entregable 01: Documentación del Despliegue
+   Compatible con css/entregables.css (paleta #5E059D / #470378 / #F8F8FC)
+   ========================================================================== */
+
+:root {
+    --dep-primary: #5e059d;
+    --dep-primary-dark: #470378;
+    --dep-primary-soft: #f4ebff;
+    --dep-border: #e6d7f5;
+    --dep-text: #2d1142;
+    --dep-muted: #665b73;
+    --dep-surface: #ffffff;
+    --dep-surface-alt: #f8f8fc;
+}
+
+.doc-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: clamp(0.74rem, 1.4vw, 0.8rem);
+    font-weight: 600;
+    background-color: var(--dep-primary-soft);
+    color: var(--dep-primary-dark);
+    border: 1px solid rgba(94, 5, 157, 0.18);
+    max-width: 100%;
+}
+
+.doc-block h3 {
+    margin-top: 22px;
+    margin-bottom: 10px;
+    font-size: clamp(1rem, 1.8vw, 1.12rem);
+    font-weight: 700;
+    color: var(--dep-primary-dark);
+}
+
+.doc-block p {
+    color: var(--dep-text);
+    line-height: 1.68;
+    margin-bottom: 12px;
+    font-size: clamp(0.9rem, 1.5vw, 0.96rem);
+}
+
+.deploy-list {
+    margin: 10px 0 16px 22px;
+    padding: 0;
+    color: var(--dep-text);
+    line-height: 1.65;
+    font-size: clamp(0.88rem, 1.5vw, 0.94rem);
+}
+
+.deploy-list li {
+    margin-bottom: 10px;
+}
+
+.table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 14px 0 18px;
+    border: 1px solid var(--dep-border);
+    border-radius: 12px;
+    background-color: var(--dep-surface);
+}
+
+.deploy-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 580px;
+    font-size: clamp(0.82rem, 1.4vw, 0.89rem);
+}
+
+.deploy-table thead {
+    background-color: var(--dep-primary);
+    color: #ffffff;
+}
+
+.deploy-table th {
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.deploy-table td {
+    padding: 12px 14px;
+    border-top: 1px solid var(--dep-border);
+    vertical-align: top;
+    line-height: 1.55;
+    color: var(--dep-text);
+}
+
+.deploy-table tbody tr:nth-child(even) {
+    background-color: var(--dep-surface-alt);
+}
+
+.deploy-table tbody tr:hover {
+    background-color: #faf5ff;
+}
+
+.status-ok,
+.status-warn {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-ok {
+    background-color: #ede9fe;
+    color: var(--dep-primary-dark);
+}
+
+.status-warn {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.deploy-note {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--dep-primary);
+    border-radius: 10px;
+    background-color: var(--dep-primary-soft);
+    color: var(--dep-text);
+    font-size: clamp(0.86rem, 1.4vw, 0.92rem);
+    line-height: 1.6;
+}
+
+.doc-nav a.is-current,
+.doc-nav a.active {
+    color: var(--dep-primary-dark);
+    font-weight: 700;
+    background-color: var(--dep-primary-soft);
+    border-radius: 8px;
+}
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .doc-nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .doc-nav a {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 600px) {
+    .deploy-table {
+        min-width: 500px;
+        font-size: 0.82rem;
+    }
+
+    .deploy-table th,
+    .deploy-table td {
+        padding: 10px 11px;
+    }
+
+    .deploy-note {
+        padding: 12px 14px;
+    }
+}

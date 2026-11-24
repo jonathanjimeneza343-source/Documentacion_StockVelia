@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>07. Otros entregables técnicos necesarios — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/07-otros-entregables.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 07 • Documentación complementaria de arquitectura, seguridad y
+                operación</span>
+            <h1>Otros entregables técnicos necesarios para StockVelia</h1>
+            <p class="doc-subtitle">
+                Compendio de documentos complementarios esenciales para gobernanza, auditoría, seguridad, modelo de
+                datos, matriz de permisos (RBAC) y operación continua del sistema StockVelia multi-empresa.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia Multi-Empresa</span>
+                <span class="meta-pill">6 anexos técnicos clave</span>
+                <span class="meta-pill">Seguridad · RBAC · Modelo de Datos · Auditoría · Incidentes ·
+                    Mantenimiento</span>
+                <span class="meta-pill">Actualización: 23 de noviembre de 2026</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Índice de entregables complementarios">
+                <h2>Anexos técnicos</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Matriz de roles y permisos (RBAC)</a></li>
+                    <li><a href="#sec-2">2. Diccionario de datos y reglas SQL</a></li>
+                    <li><a href="#sec-3">3. Seguridad, autenticación y sesiones</a></li>
+                    <li><a href="#sec-4">4. Auditoría, trazabilidad y reportes</a></li>
+                    <li><a href="#sec-5">5. Respuesta a incidentes y contingencia</a></li>
+                    <li><a href="#sec-6">6. Mantenimiento evolutivo y release</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Matriz detallada de roles, permisos y aislamiento multi-empresa (RBAC)</h2>
+                    <p>
+                        Para evitar ambigüedades operativas y de auditoría, esta matriz consolida los permisos efectivos
+                        de cada rol en <strong>StockVelia</strong> y su aislamiento por empresa activa
+                        (<code>id_empresa</code>):
+                    </p>
+                    <div class="table-wrap">
+                        <table class="other-table">
+                            <thead>
+                                <tr>
+                                    <th>Módulo / Capacidad</th>
+                                    <th>Propietario (1)</th>
+                                    <th>Admin Operativo (2)</th>
+                                    <th>Empleado (3)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Registro y vinculación de empresas</strong></td>
+                                    <td>Crea empresa inicial o vincula nueva empresa con su correo y contraseña vigente.
+                                    </td>
+                                    <td>No permitido (<code>403</code> / sin acceso).</td>
+                                    <td>No permitido (<code>403</code> / sin acceso).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cambio de empresa y color de tema</strong></td>
+                                    <td>Alterna entre empresas vinculadas y personaliza <code>color_tema</code> de la
+                                        empresa activa.</td>
+                                    <td>Opera en su empresa asignada; no cambia color corporativo.</td>
+                                    <td>Opera en su empresa asignada; no cambia color corporativo.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Categorías de productos</strong></td>
+                                    <td>Listar, crear, editar y eliminar (si no hay productos vinculados).</td>
+                                    <td>Listar, crear, editar y eliminar (si no hay productos vinculados).</td>
+                                    <td>Listar y crear; sin edición ni eliminación administrativa.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Catálogo de productos</strong></td>
+                                    <td>Listar con filtros, crear, editar (incluye <code>stock_minimo</code>) y baja
+                                        lógica (<code>INACTIVO</code>).</td>
+                                    <td>Listar con filtros, crear, editar (incluye <code>stock_minimo</code>) y baja
+                                        lógica (<code>INACTIVO</code>).</td>
+                                    <td>Listar con filtros y crear productos; sin editar ni dar de baja.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Movimientos de inventario</strong></td>
+                                    <td>Registrar <code>ENTRADA</code>, <code>SALIDA</code>/<code>VENTA</code> y
+                                        <code>BAJA</code> (con justificación obligatoria en bajas/daños).</td>
+                                    <td>Registrar <code>ENTRADA</code>, <code>SALIDA</code>/<code>VENTA</code> y
+                                        <code>BAJA</code> (con justificación obligatoria en bajas/daños).</td>
+                                    <td>Registrar <code>ENTRADA</code>, <code>SALIDA</code>/<code>VENTA</code> y
+                                        <code>BAJA</code> (con justificación obligatoria en bajas/daños).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Gestión de usuarios</strong></td>
+                                    <td>Listar, crear (roles 2 y 3), editar datos/rol, activar/suspender y baja lógica
+                                        (<code>ELIMINADO</code>). No se auto-suspende ni se da de baja.</td>
+                                    <td>Gestiona cuentas de <strong>Empleados</strong> (rol 3); no gestiona Propietario
+                                        ni otros Admin Operativos.</td>
+                                    <td>Sin acceso al módulo de gestión de usuarios.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Reportes y exportación (PDF / CSV)</strong></td>
+                                    <td>Consulta inventario, valoración (<code>stock * precio</code>) y movimientos
+                                        filtrados; exporta PDF y CSV.</td>
+                                    <td>Consulta inventario, valoración (<code>stock * precio</code>) y movimientos
+                                        filtrados; exporta PDF y CSV.</td>
+                                    <td>Sin acceso al módulo de reportes.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mi Perfil y avatar</strong></td>
+                                    <td>Consulta/edita datos propios, cambia contraseña y sube avatar (JPG/JPEG/PNG/WEBP
+                                        &lt;= 2 MB).</td>
+                                    <td>Consulta/edita datos propios, cambia contraseña y sube avatar (JPG/JPEG/PNG/WEBP
+                                        &lt;= 2 MB).</td>
+                                    <td>Consulta/edita datos propios, cambia contraseña y sube avatar (JPG/JPEG/PNG/WEBP
+                                        &lt;= 2 MB).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Diccionario de datos y reglas de integridad en PostgreSQL</h2>
+                    <p>
+                        Resumen de las entidades nucleares y salvaguardas de base de datos que mantienen la consistencia
+                        del sistema:
+                    </p>
+                    <ul class="comp-list">
+                        <li>
+                            <strong>Identidad y multi-tenancy:</strong> <code>roles</code>, <code>empresa</code>,
+                            <code>usuario</code> y <code>usuario_empresa</code> vinculan usuarios con empresas y roles,
+                            soportando múltiples empresas por Propietario y aislamiento estricto por
+                            <code>id_empresa</code>.
+                        </li>
+                        <li>
+                            <strong>Catálogo y trazabilidad de stock:</strong> <code>categorias</code> (unicidad por
+                            nombre en minúsculas dentro de cada empresa) y <code>productos</code> (unicidad de
+                            <code>codigo</code> por empresa, <code>precio &gt;= 0</code>, <code>stock &gt;= 0</code>,
+                            <code>stock_minimo &gt;= 0</code> con valor por defecto <code>5</code> y estado
+                            <code>'ACTIVO'</code> / <code>'INACTIVO'</code>).
+                        </li>
+                        <li>
+                            <strong>Movimientos y trigger atómico:</strong> <code>movimientos_inventario</code> registra
+                            <code>ENTRADA</code>, <code>SALIDA</code> (o <code>VENTA</code>) y <code>BAJA</code>. El
+                            trigger <code>trg_actualizar_stock</code> actualiza el stock en <code>productos</code> de
+                            forma
+                            atómica junto con transacciones <code>BEGIN / COMMIT / ROLLBACK</code> y bloqueo
+                            <code>FOR UPDATE</code>, exigiendo justificación en bajas/daños
+                            (<code>chk_justificacion_baja</code>).
+                        </li>
+                        <li>
+                            <strong>Seguridad y auditoría:</strong> <code>codigos_recuperacion</code> (códigos de 6
+                            dígitos con validez de 15 min), <code>tokens_blacklist</code> (revocación de JWT al cerrar
+                            sesión) y <code>auditoria</code> (registro de operaciones relevantes por empresa y usuario).
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Seguridad, autenticación y ciclo de vida de sesiones</h2>
+                    <ul class="comp-list">
+                        <li>
+                            <strong>Política de contraseñas:</strong> Mínimo 6 caracteres, incluyendo al menos una
+                            minúscula, una mayúscula y un número, almacenadas mediante hash Bcrypt.
+                        </li>
+                        <li>
+                            <strong>Bloqueo por intentos fallidos:</strong> Tras <strong>5 intentos fallidos</strong>
+                            consecutivos, se aplica bloqueo temporal de <strong>15 minutos</strong>
+                            (<code>423 Locked</code>). El contador se restablece al iniciar sesión correctamente o al
+                            restablecer la contraseña.
+                        </li>
+                        <li>
+                            <strong>Tokens JWT y cierre de sesión:</strong> Los tokens emitidos tienen expiración de
+                            <code>2h</code>, se validan en cada petición protegida (firma, estado activo del usuario y
+                            ausencia en <code>tokens_blacklist</code>) y se revocan al cerrar sesión.
+                        </li>
+                        <li>
+                            <strong>Protección de archivos y CORS:</strong> Carga de avatares limitada a JPG, JPEG, PNG
+                            y WEBP de hasta <strong>2 MB</strong> (eliminando la imagen previa al reemplazarla) y
+                            configuración explícita de CORS con <code>FRONTEND_URL</code>.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Auditoría, sincronización y reportes operativos</h2>
+                    <ul class="comp-list">
+                        <li>
+                            <strong>Bitácora de auditoría:</strong> Registra eventos clave como registro/vinculación de
+                            empresa, inicio de sesión, gestión de categorías, productos, movimientos,
+                            perfil/avatar/color
+                            corporativo y administración de usuarios.
+                        </li>
+                        <li>
+                            <strong>Sincronización en interfaz:</strong> Las vistas de Dashboard, Productos y
+                            Movimientos actualizan tras cada acción y realizan refresco automático cada
+                            <code>15000 ms</code> (15 segundos), además de recargar al cambiar de empresa activa.
+                        </li>
+                        <li>
+                            <strong>Valoración y exportación:</strong> Los reportes calculan unidades y valoración
+                            económica (<code>stock * precio</code>), permiten filtrar movimientos por fecha y producto,
+                            y
+                            exportan a <strong>PDF</strong> (<code>jsPDF</code> + <code>autoTable</code>) o
+                            <strong>CSV</strong> (UTF-8 con BOM y separador <code>;</code>).
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Protocolo de respuesta a incidentes y contingencia</h2>
+                    <ol class="comp-list">
+                        <li>
+                            <strong>Detección y clasificación:</strong> Identificar si el incidente afecta
+                            disponibilidad, integridad de stock/BD, seguridad/autenticación o envío de correo/archivos,
+                            asignando severidad (Crítica, Alta, Media o Baja).
+                        </li>
+                        <li>
+                            <strong>Contención:</strong> Revocar sesiones comprometidas si aplica, bloquear accesos
+                            anómalos o pausar operaciones de escritura si hay riesgo de inconsistencia de datos.
+                        </li>
+                        <li>
+                            <strong>Erradicación y recuperación:</strong> Corregir la causa raíz, restaurar desde el
+                            último respaldo íntegro verificado (según el <em>Entregable 04</em>) si hubo corrupción y
+                            validar conteos de stock y estados de usuario.
+                        </li>
+                        <li>
+                            <strong>Lecciones aprendidas:</strong> Documentar causa, impacto, tiempos de atención y
+                            acciones preventivas para evitar recurrencia.
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 6 -->
+                <section class="doc-block" id="sec-6">
+                    <h2>6. Mantenimiento evolutivo, control de cambios y pases a producción</h2>
+                    <p>
+                        Todo cambio sobre el código, esquema SQL o configuración debe seguir un flujo controlado:
+                    </p>
+                    <ul class="comp-list">
+                        <li>
+                            <strong>Control de versiones y ramas:</strong> Desarrollar cambios en ramas dedicadas,
+                            revisar diferencias y validar compatibilidad entre frontend, backend y esquema PostgreSQL.
+                        </li>
+                        <li>
+                            <strong>Migraciones y respaldo previo:</strong> Realizar respaldo antes de aplicar cambios
+                            estructurales en base de datos o despliegues en producción.
+                        </li>
+                        <li>
+                            <strong>Pruebas de regresión y post-despliegue:</strong> Ejecutar los casos críticos del
+                            <em>Entregable 03</em> (autenticación, multi-empresa, roles, movimientos de stock y
+                            reportes) tras cada liberación.
+                        </li>
+                    </ul>
+                    <div class="summary-box">
+                        <strong>Cierre de documentación:</strong> Con este entregable complementario se cubre la
+                        gobernanza técnica, de seguridad, de datos y de operación continua de StockVelia de forma
+                        coherente con el código y la base de datos implementados.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 07: Otros entregables técnicos necesarios</div>
+    </footer>
+
+    <script src="../js/07-otros-entregables.js"></script>
+</body>
+
+</html>

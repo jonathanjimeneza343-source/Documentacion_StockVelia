@@ -1,0 +1,195 @@
+/* ==========================================================================
+   Estilos específicos para Entregable 06: Manual de Instalación
+   Compatible con css/entregables.css (paleta #5E059D / #470378 / #F8F8FC)
+   ========================================================================== */
+
+:root {
+    --inst-primary: #5e059d;
+    --inst-primary-dark: #470378;
+    --inst-primary-soft: #f4ebff;
+    --inst-border: #e6d7f5;
+    --inst-text: #2d1142;
+    --inst-muted: #665b73;
+    --inst-surface: #ffffff;
+    --inst-surface-alt: #f8f8fc;
+    --inst-code-bg: #1e1b2e;
+    --inst-code-text: #f3e8ff;
+}
+
+.doc-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: clamp(0.74rem, 1.4vw, 0.8rem);
+    font-weight: 600;
+    background-color: var(--inst-primary-soft);
+    color: var(--inst-primary-dark);
+    border: 1px solid rgba(94, 5, 157, 0.18);
+    max-width: 100%;
+}
+
+.doc-block h3 {
+    margin-top: 22px;
+    margin-bottom: 10px;
+    font-size: clamp(1rem, 1.8vw, 1.12rem);
+    font-weight: 700;
+    color: var(--inst-primary-dark);
+}
+
+.doc-block p {
+    color: var(--inst-text);
+    line-height: 1.68;
+    margin-bottom: 12px;
+    font-size: clamp(0.9rem, 1.5vw, 0.96rem);
+}
+
+.inst-steps {
+    margin: 10px 0 16px 22px;
+    padding: 0;
+    color: var(--inst-text);
+    line-height: 1.65;
+    font-size: clamp(0.88rem, 1.5vw, 0.94rem);
+}
+
+.inst-steps li {
+    margin-bottom: 12px;
+}
+
+.sub-list {
+    margin: 8px 0 12px 20px;
+    padding: 0;
+}
+
+.sub-list li {
+    margin-bottom: 6px;
+}
+
+.code-block {
+    margin: 10px 0 14px;
+    padding: 13px 15px;
+    border-radius: 10px;
+    background-color: var(--inst-code-bg);
+    color: var(--inst-code-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: clamp(0.78rem, 1.35vw, 0.85rem);
+    line-height: 1.55;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    border: 1px solid rgba(94, 5, 157, 0.28);
+}
+
+.code-block code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 14px 0 18px;
+    border: 1px solid var(--inst-border);
+    border-radius: 12px;
+    background-color: var(--inst-surface);
+}
+
+.inst-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+    font-size: clamp(0.82rem, 1.4vw, 0.89rem);
+}
+
+.inst-table thead {
+    background-color: var(--inst-primary);
+    color: #ffffff;
+}
+
+.inst-table th {
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.inst-table td {
+    padding: 12px 14px;
+    border-top: 1px solid var(--inst-border);
+    vertical-align: top;
+    line-height: 1.55;
+    color: var(--inst-text);
+}
+
+.inst-table tbody tr:nth-child(even) {
+    background-color: var(--inst-surface-alt);
+}
+
+.inst-table tbody tr:hover {
+    background-color: #faf5ff;
+}
+
+.note-box {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--inst-primary);
+    border-radius: 10px;
+    background-color: var(--inst-primary-soft);
+    color: var(--inst-text);
+    font-size: clamp(0.86rem, 1.4vw, 0.92rem);
+    line-height: 1.6;
+}
+
+.doc-nav a.is-current,
+.doc-nav a.active {
+    color: var(--inst-primary-dark);
+    font-weight: 700;
+    background-color: var(--inst-primary-soft);
+    border-radius: 8px;
+}
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .doc-nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .doc-nav a {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 600px) {
+    .inst-table {
+        min-width: 520px;
+        font-size: 0.82rem;
+    }
+
+    .inst-table th,
+    .inst-table td {
+        padding: 10px 11px;
+    }
+
+    .code-block {
+        padding: 11px 12px;
+    }
+
+    .note-box {
+        padding: 12px 14px;
+    }
+}

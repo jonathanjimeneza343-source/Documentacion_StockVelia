@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>05. Manual de Usuario — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/05-manual-usuario.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 05 • Guía operativa integral para usuarios finales</span>
+            <h1>Manual de Usuario completo de StockVelia</h1>
+            <p class="doc-subtitle">
+                Guía práctica, paso a paso y detallada para Propietarios, Administradores Operativos y Empleados
+                sobre acceso, multi-empresa, catálogo, movimientos de inventario, usuarios, reportes, seguridad y
+                resolución de incidencias.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia Multi-Empresa</span>
+                <span class="meta-pill">Roles: Propietario (1) · Admin Operativo (2) · Empleado (3)</span>
+                <span class="meta-pill">Módulos: Dashboard · Productos · Categorías · Movimientos · Usuarios ·
+                    Reportes · Perfil</span>
+                <span class="meta-pill">Actualización: 23 de noviembre de 2026</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Índice del Manual de Usuario">
+                <h2>Contenido</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Bienvenida, roles y navegación</a></li>
+                    <li><a href="#sec-2">2. Acceso, multi-empresa y contraseñas</a></li>
+                    <li><a href="#sec-3">3. Dashboard y alertas de stock</a></li>
+                    <li><a href="#sec-4">4. Categorías y catálogo de productos</a></li>
+                    <li><a href="#sec-5">5. Movimientos de inventario</a></li>
+                    <li><a href="#sec-6">6. Usuarios, perfil y color corporativo</a></li>
+                    <li><a href="#sec-7">7. Reportes y exportación PDF / CSV</a></li>
+                    <li><a href="#sec-8">8. Buenas prácticas y preguntas frecuentes</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Bienvenida, roles y estructura de navegación</h2>
+                    <p>
+                        <strong>StockVelia</strong> es una plataforma de gestión de inventarios multi-empresa diseñada
+                        para controlar existencias, categorías, entradas, salidas y bajas de mercancía, usuarios
+                        operativos y reportes financieros/operativos de inventario, manteniendo los datos de cada
+                        empresa
+                        estrictamente aislados.
+                    </p>
+                    <h3>1.1 ¿Qué puede hacer cada rol en el sistema?</h3>
+                    <p>
+                        Los permisos y menús visibles dependen del rol asignado a tu cuenta dentro de la empresa activa:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="manual-table">
+                            <thead>
+                                <tr>
+                                    <th>Rol</th>
+                                    <th>Módulos visibles y permisos principales</th>
+                                    <th>Restricciones clave</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Propietario</strong><br><span class="role-chip">Rol 1</span></td>
+                                    <td>
+                                        Acceso total a <strong>Dashboard</strong>, <strong>Productos</strong>,
+                                        <strong>Categorías</strong>, <strong>Movimientos</strong>,
+                                        <strong>Usuarios</strong>, <strong>Reportes</strong> y <strong>Mi
+                                            Perfil</strong>. Puede crear nuevas empresas, cambiar entre empresas
+                                        vinculadas y personalizar el color corporativo de la empresa activa.
+                                    </td>
+                                    <td>
+                                        Su rol no puede ser alterado ni dado de baja desde la administración de
+                                        usuarios. Para vincular otra empresa con el mismo correo debe ingresar su
+                                        contraseña vigente.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Administrador Operativo</strong><br><span class="role-chip">Rol 2</span>
+                                    </td>
+                                    <td>
+                                        Acceso a <strong>Dashboard</strong>, <strong>Productos</strong> (crear, editar,
+                                        dar de baja lógica), <strong>Categorías</strong> (crear, editar, eliminar si no
+                                        tienen productos), <strong>Movimientos</strong>, <strong>Reportes</strong>,
+                                        <strong>Usuarios</strong> (solo gestión de Empleados) y <strong>Mi
+                                            Perfil</strong>.
+                                    </td>
+                                    <td>
+                                        No puede crear empresas adicionales, cambiar el color del tema empresarial ni
+                                        administrar al Propietario u otros Administradores Operativos.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Empleado</strong><br><span class="role-chip">Rol 3</span></td>
+                                    <td>
+                                        Acceso a <strong>Dashboard</strong>, <strong>Productos</strong> (consultar con
+                                        filtros y crear nuevos productos), <strong>Categorías</strong> (consultar y
+                                        crear
+                                        nuevas categorías), <strong>Movimientos</strong> (registrar entradas, salidas y
+                                        bajas) y <strong>Mi Perfil</strong>.
+                                    </td>
+                                    <td>
+                                        No visualiza <strong>Usuarios</strong> ni <strong>Reportes</strong> en la
+                                        navegación principal y no puede editar ni desactivar productos existentes.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>1.2 Estructura de la interfaz y actualización de datos</h3>
+                    <ul class="step-list">
+                        <li>
+                            <strong>Barra lateral (Sidebar):</strong> Permite navegar entre los módulos habilitados para
+                            tu rol y muestra la identidad del sistema y tu sesión.
+                        </li>
+                        <li>
+                            <strong>Encabezado superior (Header):</strong> Muestra información de contexto, acceso al
+                            perfil y, cuando aplique, el selector para alternar entre empresas o registrar una empresa
+                            nueva.
+                        </li>
+                        <li>
+                            <strong>Sincronización automática:</strong> Las vistas principales (Dashboard, Productos y
+                            Movimientos) refrescan su información inmediatamente tras registrar una acción y actualizan
+                            periódicamente cada <strong>15 segundos</strong> (<code>15000 ms</code>), o al cambiar de
+                            empresa activa.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Acceso, gestión multi-empresa y recuperación de contraseña</h2>
+                    <h3>2.1 Registro inicial de empresa y cuenta de Propietario</h3>
+                    <ol class="step-list">
+                        <li>Abre la pantalla de registro de <strong>StockVelia</strong>.</li>
+                        <li>Completa los datos de la empresa (nombre, información fiscal/operativa si aplica y color
+                            corporativo deseado, con opción predeterminada en tonos morados).</li>
+                        <li>Ingresa los datos del usuario inicial (nombre, correo electrónico y contraseña segura:
+                            mínimo 6 caracteres, con al menos una letra mayúscula, una minúscula y un número).</li>
+                        <li>Envía el formulario para crear la empresa y activar tu sesión con rol
+                            <strong>Propietario</strong>.
+                        </li>
+                    </ol>
+
+                    <h3>2.2 Vinculación de una empresa adicional a un Propietario existente</h3>
+                    <p>
+                        Si ya eres <strong>Propietario</strong> con estado activo y deseas administrar otra empresa bajo
+                        el mismo correo:
+                    </p>
+                    <ol class="step-list">
+                        <li>Inicia el flujo de registro de nueva empresa usando tu correo electrónico registrado.</li>
+                        <li>Introduce tu <strong>contraseña actual</strong> para validar la titularidad de la cuenta.
+                        </li>
+                        <li>Completa los datos de la nueva empresa y confirma. La nueva empresa quedará vinculada a tu
+                            usuario y disponible en el selector de empresas.</li>
+                    </ol>
+
+                    <h3>2.3 Inicio de sesión, bloqueo temporal y cierre de sesión</h3>
+                    <ol class="step-list">
+                        <li>Ingresa tu correo electrónico y contraseña en la pantalla de inicio de sesión.</li>
+                        <li>Si tienes varias empresas vinculadas, selecciona en <code>ModalSeleccionarEmpresa</code> (o
+                            desde el encabezado) la empresa con la que trabajarás.</li>
+                        <li><strong>Atención al bloqueo por intentos fallidos:</strong> Si ingresas una contraseña
+                            incorrecta <strong>5 veces consecutivas</strong>, el sistema bloquea temporalmente el
+                            acceso por <strong>15 minutos</strong>. Espera a que cumpla el tiempo o restablece tu
+                            contraseña.</li>
+                        <li>Para salir de forma segura, haz clic en <strong>Cerrar sesión</strong>: el sistema invalida
+                            el token en el servidor y limpia los datos de sesión en tu navegador.</li>
+                    </ol>
+
+                    <h3>2.4 Recuperación de contraseña mediante código de 6 dígitos</h3>
+                    <ol class="step-list">
+                        <li>En la pantalla de acceso, haz clic en <strong>¿Olvidaste tu contraseña?</strong> e ingresa
+                            tu correo electrónico.</li>
+                        <li>Revisa tu bandeja de entrada (y carpeta de correo no deseado) para obtener el
+                            <strong>código de 6 dígitos</strong>, el cual tiene una vigencia de <strong>15
+                                minutos</strong>.
+                        </li>
+                        <li>Introduce el código recibido junto con tu nueva contraseña (cumpliendo la política de
+                            mayúscula, minúscula, número y mínimo 6 caracteres) y confirma.</li>
+                        <li>Una vez restablecida, el contador de intentos fallidos y el bloqueo temporal quedan
+                            reiniciados.</li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Dashboard y monitoreo de alertas de stock</h2>
+                    <p>
+                        El <strong>Dashboard</strong> ofrece una vista rápida del estado operativo de la empresa activa:
+                    </p>
+                    <ul class="step-list">
+                        <li>
+                            <strong>Indicadores resumidos:</strong> Consulta el panorama de productos activos,
+                            categorías, movimientos recientes y alertas de reposición según tu rol.
+                        </li>
+                        <li>
+                            <strong>Productos con stock bajo o crítico:</strong> Cuando un producto activo tiene
+                            <code>stock &lt;= stock_minimo</code>, se destaca como alerta para priorizar una
+                            <code>ENTRADA</code> de mercancía y evitar quiebres de inventario.
+                        </li>
+                        <li>
+                            <strong>Cambio de empresa en caliente:</strong> Si cambias de empresa desde el selector
+                            superior, las métricas y tablas del Dashboard se recargan con los datos de la empresa
+                            elegida.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Categorías y catálogo de productos</h2>
+                    <h3>4.1 Gestión de categorías</h3>
+                    <ol class="step-list">
+                        <li>Ingresa al módulo <strong>Categorías</strong> desde la barra lateral.</li>
+                        <li><strong>Crear categoría:</strong> Haz clic en <strong>Nueva categoría</strong>, escribe un
+                            nombre descriptivo y guarda. El sistema verifica que no exista otra categoría con el mismo
+                            nombre (sin distinguir mayúsculas/minúsculas) dentro de tu empresa.</li>
+                        <li><strong>Editar categoría:</strong> Si tienes rol de Propietario o Administrador Operativo,
+                            puedes modificar el nombre de una categoría existente.</li>
+                        <li><strong>Eliminar categoría:</strong> Solo es posible eliminar una categoría si no tiene
+                            productos asociados en tu empresa.</li>
+                    </ol>
+
+                    <h3>4.2 Registro, edición, filtros y baja lógica de productos</h3>
+                    <ol class="step-list">
+                        <li>Ve a <strong>Productos</strong> en el menú lateral.</li>
+                        <li><strong>Crear producto:</strong> Haz clic en <strong>Nuevo producto</strong> y completa:
+                            <strong>Código</strong> (único dentro de tu empresa), <strong>Nombre</strong>,
+                            <strong>Categoría</strong> (perteneciente a tu empresa), <strong>Precio</strong> (mayor o
+                            igual a 0), <strong>Stock inicial</strong> (entero mayor o igual a 0) y <strong>Stock
+                                mínimo</strong> (entero mayor o igual a 0; valor por defecto <code>5</code>).
+                        </li>
+                        <li><strong>Buscar y filtrar productos:</strong> Utiliza los filtros combinados por: texto de
+                            búsqueda (nombre o código), categoría, estado de stock (<strong>Stock bajo/crítico</strong>
+                            cuando <code>stock &lt;= stock_minimo</code> o <strong>Stock saludable</strong> cuando
+                            <code>stock &gt; stock_minimo</code>) y rango de precios (mínimo y máximo).
+                        </li>
+                        <li><strong>Editar o dar de baja un producto (Propietario y Admin Operativo):</strong> Puedes
+                            actualizar datos del producto o su <code>stock_minimo</code>. Al dar de baja un producto,
+                            pasa a estado <strong>INACTIVO</strong> para retirarlo de la operación activa sin borrar su
+                            historial de movimientos.</li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Registro de movimientos de inventario</h2>
+                    <p>
+                        Cada ingreso, despacho o retiro de mercancía debe registrarse en el módulo
+                        <strong>Movimientos</strong> para mantener el stock real y trazable:
+                    </p>
+                    <ol class="step-list">
+                        <li>Abre <strong>Movimientos</strong> y selecciona <strong>Registrar movimiento</strong>.</li>
+                        <li>Elige el <strong>producto activo</strong> de tu empresa.</li>
+                        <li>Selecciona el <strong>tipo de movimiento</strong>: <strong>ENTRADA</strong> (incrementa el
+                            stock por compras, devoluciones o reposición), <strong>SALIDA</strong> (descuenta stock por
+                            despacho o venta) o <strong>BAJA</strong> (descuenta stock por pérdida, daño, merma u
+                            obsolescencia).</li>
+                        <li>Ingresa la <strong>cantidad</strong> (número entero mayor que 0).</li>
+                        <li><strong>Justificación obligatoria en bajas o daños:</strong> Si el movimiento es de tipo
+                            <code>BAJA</code> o el motivo corresponde a baja, daño u obsolescencia, debes escribir una
+                            <strong>observación o justificación</strong> clara. Sin justificación, el sistema rechazará
+                            el registro.
+                        </li>
+                        <li>Confirma el movimiento: el stock del producto se actualiza automáticamente y, si queda igual
+                            o por debajo del <code>stock_minimo</code>, se activará la alerta correspondiente.</li>
+                    </ol>
+                    <div class="info-box">
+                        <strong>Control de existencias negativas:</strong> El sistema impide registrar salidas o bajas
+                        por una cantidad mayor al stock disponible del producto.
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 6 -->
+                <section class="doc-block" id="sec-6">
+                    <h2>6. Usuarios, perfil personal y color corporativo</h2>
+                    <h3>6.1 Administración de usuarios (Propietario y Admin Operativo)</h3>
+                    <ol class="step-list">
+                        <li>Accede a <strong>Usuarios</strong> en la barra lateral.</li>
+                        <li><strong>Crear usuario:</strong> Registra los datos del colaborador y asigna su rol. El
+                            <strong>Propietario</strong> puede crear <strong>Administradores Operativos</strong> o
+                            <strong>Empleados</strong>; el <strong>Administrador Operativo</strong> gestiona cuentas de
+                            <strong>Empleados</strong>.
+                        </li>
+                        <li><strong>Cambiar estado o dar de baja:</strong> Puedes alternar entre <strong>ACTIVO</strong>
+                            e <strong>INACTIVO</strong> o aplicar baja lógica (<strong>ELIMINADO</strong>) sobre
+                            usuarios permitidos. El Propietario no puede ser suspendido ni dado de baja desde el panel.
+                        </li>
+                    </ol>
+
+                    <h3>6.2 Mi Perfil, foto de avatar y color de la empresa</h3>
+                    <ol class="step-list">
+                        <li>Abre <strong>Mi Perfil</strong> para actualizar tu nombre, teléfono o contraseña (si cambias
+                            contraseña, deberás confirmar tu contraseña actual).</li>
+                        <li><strong>Subir o cambiar foto de perfil:</strong> Selecciona una imagen en formato
+                            <strong>JPG, JPEG, PNG o WEBP</strong> con peso máximo de <strong>2 MB</strong>. Al subir
+                            una nueva, el sistema reemplaza y elimina el archivo anterior.
+                        </li>
+                        <li><strong>Color corporativo de la empresa (solo Propietario):</strong> Desde la configuración
+                            de empresa/perfil, el Propietario puede elegir un color hexadecimal para personalizar la
+                            apariencia de la empresa activa.</li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 7 -->
+                <section class="doc-block" id="sec-7">
+                    <h2>7. Reportes y exportación a PDF y CSV</h2>
+                    <p>
+                        Los usuarios con rol <strong>Propietario</strong> o <strong>Administrador Operativo</strong>
+                        pueden consultar y exportar información consolidada de su empresa activa:
+                    </p>
+                    <ol class="step-list">
+                        <li>Ingresa a <strong>Reportes</strong> desde el menú lateral.</li>
+                        <li>Revisa los totales de unidades y la valoración económica del inventario (calculada como
+                            <code>stock * precio</code>) por producto y categoría.
+                        </li>
+                        <li>Filtra el historial de <strong>movimientos</strong> por rango de fechas y por producto
+                            específico según necesites auditar o analizar.</li>
+                        <li><strong>Exportar información:</strong> Descarga el reporte filtrado en formato
+                            <strong>PDF</strong> o en formato <strong>CSV</strong> (codificado en UTF-8 con BOM y
+                            delimitador <code>;</code>, listo para abrir en hojas de cálculo como Excel).
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 8 -->
+                <section class="doc-block" id="sec-8">
+                    <h2>8. Buenas prácticas y preguntas frecuentes (FAQ)</h2>
+                    <ul class="step-list">
+                        <li>
+                            <strong>¿Por qué no puedo eliminar una categoría?</strong> Porque tiene productos asociados
+                            en tu empresa. Primero reasigna o inactiva esos productos y luego intenta eliminar la
+                            categoría.
+                        </li>
+                        <li>
+                            <strong>¿Qué pasa si doy de baja un producto?</strong> Pasa a estado <code>INACTIVO</code>
+                            para no seguir operándose como activo, pero se conserva su historial de movimientos y
+                            trazabilidad.
+                        </li>
+                        <li>
+                            <strong>¿Por qué me pide justificación al registrar una baja?</strong> Para garantizar
+                            control interno y auditoría ante pérdidas, daños o productos vencidos/obsoletos.
+                        </li>
+                        <li>
+                            <strong>¿Cómo cambio de empresa si administro más de una?</strong> Usa el selector de
+                            empresa en el encabezado o inicia sesión nuevamente y elige la empresa deseada.
+                        </li>
+                        <li>
+                            <strong>¿Qué hago si mi cuenta quedó bloqueada tras varios intentos fallidos?</strong>
+                            Espera los 15 minutos de bloqueo temporal o usa la opción de recuperación de contraseña con
+                            código de 6 dígitos.
+                        </li>
+                    </ul>
+                    <div class="info-box">
+                        <strong>Recomendación operativa:</strong> Verifica siempre en el encabezado que estás operando
+                        sobre la empresa correcta antes de registrar productos, movimientos o cambios de configuración.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 05: Manual de Usuario</div>
+    </footer>
+
+    <script src="../js/05-manual-usuario.js"></script>
+</body>
+
+</html>

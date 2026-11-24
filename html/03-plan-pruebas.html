@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>03. Plan de pruebas — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/03-plan-pruebas.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 03 • Verificación y aseguramiento de calidad</span>
+            <h1>Plan de pruebas integral de StockVelia</h1>
+            <p class="doc-subtitle">
+                Estrategia de validación funcional, de seguridad, concurrencia, multi-empresa e interfaz alineada
+                con las rutas, controladores, triggers PostgreSQL y componentes React implementados.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia Multi-Empresa</span>
+                <span class="meta-pill">Cobertura: Auth · Catálogo · Movimientos · Roles · Reportes</span>
+                <span class="meta-pill">BD: PostgreSQL + Triggers y Restricciones</span>
+                <span class="meta-pill">Actualización: 23 de noviembre de 2026</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Navegación del plan de pruebas">
+                <h2>Secciones</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Estrategia y alcance</a></li>
+                    <li><a href="#sec-2">2. Entorno y datos de prueba</a></li>
+                    <li><a href="#sec-3">3. Casos de prueba funcionales</a></li>
+                    <li><a href="#sec-4">4. Seguridad, concurrencia y BD</a></li>
+                    <li><a href="#sec-5">5. Criterios de salida y riesgos</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Estrategia y alcance del plan de pruebas</h2>
+                    <p>
+                        Este plan define cómo verificar que <strong>StockVelia</strong> cumple los requisitos
+                        funcionales, reglas de negocio y requisitos no funcionales en su estado real de
+                        implementación (backend Node.js/Express, base de datos PostgreSQL con triggers y
+                        restricciones <code>CHECK</code>, y frontend React con sincronización periódica cada
+                        <code>15000 ms</code>).
+                    </p>
+                    <h3>1.1 Niveles y tipos de prueba</h3>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Pruebas funcionales (API + UI):</strong> Validan registro/vinculación
+                            multi-empresa, login, bloqueo tras 5 intentos fallidos, recuperación de contraseña con
+                            código
+                            de 6 dígitos, cierre de sesión con revocación en <code>tokens_blacklist</code>, CRUD de
+                            categorías y productos, movimientos de inventario (<code>ENTRADA</code>,
+                            <code>SALIDA</code>/<code>VENTA</code>, <code>BAJA</code>), administración de usuarios y
+                            reportes.
+                        </li>
+                        <li>
+                            <strong>Pruebas de autorización y multi-tenancy (RBAC + Aislamiento):</strong> Verifican
+                            restricciones por rol (<code>Propietario = 1</code>,
+                            <code>Administrador Operativo = 2</code>,
+                            <code>Empleado = 3</code>) y el rechazo (<code>403 Forbidden</code>) ante accesos
+                            cruzados entre empresas (<code>id_empresa</code>).
+                        </li>
+                        <li>
+                            <strong>Pruebas de integridad de base de datos y concurrencia:</strong> Comprueban el
+                            trigger <code>trg_actualizar_stock</code>, transacciones
+                            <code>BEGIN / COMMIT / ROLLBACK</code> con <code>FOR UPDATE</code>, no negatividad de
+                            stock/precio/stock mínimo y exigencia de justificación en bajas/daños.
+                        </li>
+                        <li>
+                            <strong>Pruebas de interfaz y exportación:</strong> Verifican filtros combinados en
+                            Catálogo, selector de empresa, tema dinámico por color corporativo, subida de avatar
+                            (JPG/JPEG/PNG/WEBP hasta 2 MB), refresco periódico y descarga de reportes en
+                            <strong>PDF</strong> y <strong>CSV</strong>.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Entorno de pruebas y datos semilla</h2>
+                    <p>
+                        Para ejecutar el plan de forma reproducible se requieren los siguientes componentes y conjuntos
+                        de datos:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="test-table">
+                            <thead>
+                                <tr>
+                                    <th>Componente</th>
+                                    <th>Configuración requerida para pruebas</th>
+                                    <th>Datos y precondiciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Backend API</strong></td>
+                                    <td>
+                                        Servidor Node.js/Express activo con <code>JWT_SECRET</code>, configuración
+                                        CORS y servicio de correo (SMTP/Nodemailer) disponible para pruebas de
+                                        recuperación de contraseña.
+                                    </td>
+                                    <td>
+                                        Rutas <code>/api/auth</code>, <code>/api/usuarios</code>,
+                                        <code>/api/categorias</code>, <code>/api/productos</code>,
+                                        <code>/api/movimientos</code> y <code>/api/reportes</code> operativas.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Base de Datos</strong></td>
+                                    <td>
+                                        Instancia PostgreSQL con tablas <code>roles</code>, <code>empresa</code>,
+                                        <code>usuario</code>, <code>usuario_empresa</code>, <code>categorias</code>,
+                                        <code>productos</code>, <code>movimientos_inventario</code>,
+                                        <code>codigos_recuperacion</code>, <code>tokens_blacklist</code> y
+                                        <code>auditoria</code>, más trigger <code>trg_actualizar_stock</code>.
+                                    </td>
+                                    <td>
+                                        Roles sembrados: <code>1 (Propietario)</code>,
+                                        <code>2 (Administrador Operativo)</code>, <code>3 (Empleado)</code>. Dos
+                                        empresas de prueba (<code>Empresa A</code> y <code>Empresa B</code>) para
+                                        validar aislamiento multi-empresa.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Frontend React</strong></td>
+                                    <td>
+                                        Aplicación React conectada al backend, con <code>localStorage</code> limpio al
+                                        inicio de cada ciclo de sesión y navegador actualizado con soporte para
+                                        <code>IntersectionObserver</code> y descarga de archivos.
+                                    </td>
+                                    <td>
+                                        Usuarios activos de los tres roles en <code>Empresa A</code> y un Propietario
+                                        vinculado a múltiples empresas.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Casos de prueba funcionales (CP-FUNC)</h2>
+                    <p>
+                        Matriz de casos de prueba principales agrupados por flujo del sistema:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="test-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Módulo / Flujo</th>
+                                    <th>Pasos clave de ejecución</th>
+                                    <th>Resultado esperado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>CP-01</strong></td>
+                                    <td>Registro y vinculación multi-empresa</td>
+                                    <td>
+                                        1. Registrar una empresa nueva con correo inédito.<br>
+                                        2. Registrar una segunda empresa usando el mismo correo de Propietario
+                                        activo y su contraseña válida.
+                                    </td>
+                                    <td>
+                                        Se crea la empresa, se asigna rol <code>1 (Propietario)</code>, se vincula en
+                                        <code>usuario_empresa</code>, se habilita el selector de empresa y se
+                                        registra la acción en <code>auditoria</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CP-02</strong></td>
+                                    <td>Login, bloqueo por 5 intentos y logout</td>
+                                    <td>
+                                        1. Enviar 5 intentos consecutivos con contraseña incorrecta.<br>
+                                        2. Intentar login en el 6.° intento.<br>
+                                        3. Iniciar sesión con clave correcta y luego ejecutar logout.
+                                    </td>
+                                    <td>
+                                        Tras el 5.° fallo se fija <code>bloqueo_hasta</code> por 15 minutos y se
+                                        responde <code>423 Locked</code>. Tras login válido, se emite JWT (2h) y
+                                        limpia contador; tras logout, el token queda en <code>tokens_blacklist</code> y
+                                        es rechazado con <code>401</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CP-03</strong></td>
+                                    <td>Recuperación de contraseña</td>
+                                    <td>
+                                        1. Solicitar código de recuperación para un correo válido.<br>
+                                        2. Ingresar código de 6 dígitos vigente y nueva contraseña segura
+                                        (mayúscula, minúscula, número, mín. 6 caracteres).
+                                    </td>
+                                    <td>
+                                        Se envía el código con vigencia de 15 minutos; al restablecer se actualiza la
+                                        contraseña con Bcrypt, se reinicia <code>intentos_fallidos = 0</code>, se
+                                        limpia <code>bloqueo_hasta</code> y se invalida el código usado.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CP-04</strong></td>
+                                    <td>Categorías y Productos</td>
+                                    <td>
+                                        1. Crear categoría en <code>Empresa A</code> e intentar duplicar el nombre
+                                        ignorando mayúsculas.<br>
+                                        2. Crear producto con código único, precio <code>&gt;= 0</code>, stock
+                                        <code>&gt;= 0</code> y <code>stock_minimo</code>.<br>
+                                        3. Dar de baja lógica un producto y probar eliminar una categoría con
+                                        producto asociado.
+                                    </td>
+                                    <td>
+                                        Se rechaza la categoría duplicada en la misma empresa; el producto queda
+                                        <code>ACTIVO</code>; la baja lógica cambia el producto a
+                                        <code>estado = 'INACTIVO'</code> conservando historial; eliminar categoría con
+                                        productos asociados es bloqueado.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CP-05</strong></td>
+                                    <td>Movimientos y actualización de stock</td>
+                                    <td>
+                                        1. Registrar <code>ENTRADA</code> de 10 unidades.<br>
+                                        2. Registrar <code>SALIDA</code> o <code>BAJA</code> superando el stock
+                                        disponible.<br>
+                                        3. Registrar <code>BAJA</code> o motivo de daño/obsolescencia sin
+                                        justificación y luego con justificación válida.
+                                    </td>
+                                    <td>
+                                        La <code>ENTRADA</code> incrementa el stock vía
+                                        <code>trg_actualizar_stock</code> y alerta si
+                                        <code>stock &lt;= stock_minimo</code>. El exceso de salida/baja y la falta de
+                                        justificación en bajas/daños son rechazados; con justificación válida se
+                                        registra y actualiza stock.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CP-06</strong></td>
+                                    <td>Usuarios, perfil y color corporativo</td>
+                                    <td>
+                                        1. Propietario crea <code>Administrador Operativo</code> y
+                                        <code>Empleado</code>.<br>
+                                        2. Propietario cambia <code>color_tema</code> de la empresa.<br>
+                                        3. Usuario sube avatar válido (PNG/WEBP <code>&lt;= 2 MB</code>) y prueba
+                                        archivo inválido (<code>&gt; 2 MB</code> o formato no permitido).
+                                    </td>
+                                    <td>
+                                        Se aplican los permisos por rol, cambia el color corporativo en la UI, se
+                                        guarda el avatar eliminando el anterior y se rechazan archivos fuera de
+                                        formato o tamaño máximo.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CP-07</strong></td>
+                                    <td>Reportes, filtros y exportación</td>
+                                    <td>
+                                        1. Filtrar catálogo por texto, categoría, estado de stock y rango de
+                                        precios.<br>
+                                        2. Filtrar movimientos por fechas y producto en Reportes y exportar a
+                                        <strong>PDF</strong> y <strong>CSV</strong>.
+                                    </td>
+                                    <td>
+                                        Los filtros y totales (unidades y valoración <code>stock * precio</code>)
+                                        coinciden con los datos activos de la empresa y generan archivos descargables
+                                        en PDF y CSV (UTF-8 con BOM y separador <code>;</code>).
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Pruebas de seguridad, concurrencia y base de datos</h2>
+                    <p>
+                        Escenarios críticos para validar que las protecciones técnicas funcionan bajo condiciones
+                        exigentes:
+                    </p>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Aislamiento multi-empresa (CP-SEC-01):</strong> Con un token de
+                            <code>Empresa A</code>, invocar endpoints de reportes o intentar operar sobre recursos de
+                            <code>Empresa B</code>. Debe retornar <code>403 Forbidden</code> sin exponer ni alterar
+                            datos de <code>Empresa B</code>.
+                        </li>
+                        <li>
+                            <strong>Control de acceso basado en roles (CP-SEC-02):</strong> Verificar que un
+                            <code>Empleado</code> (rol 3) no acceda a gestión de usuarios ni reportes en la UI ni
+                            pueda editar/desactivar productos en la API, y que un <code>Administrador Operativo</code>
+                            (rol 2) no pueda gestionar al Propietario ni crear otros Administradores Operativos.
+                        </li>
+                        <li>
+                            <strong>Concurrencia en movimientos de stock (CP-CONC-01):</strong> Lanzar solicitudes
+                            simultáneas de <code>SALIDA</code>/<code>BAJA</code> sobre un mismo producto con stock
+                            limitado. Gracias a la transacción y al bloqueo de fila <code>FOR UPDATE</code> más la
+                            validación de stock no negativo, nunca debe producirse stock negativo ni pérdida silenciosa
+                            de actualizaciones.
+                        </li>
+                        <li>
+                            <strong>Restricciones SQL y refresco periódico (CP-BD-01):</strong> Verificar
+                            restricciones <code>CHECK</code> de precios y stocks no negativos y
+                            <code>chk_justificacion_baja</code> en PostgreSQL, así como la actualización en vistas tras
+                            operaciones y mediante refresco cada <code>15000 ms</code>.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Criterios de salida, defectos y riesgos</h2>
+                    <p>
+                        Condiciones necesarias para dar por aprobado el ciclo de pruebas y riesgos operativos a
+                        monitorear:
+                    </p>
+                    <h3>5.1 Criterios de entrada y salida</h3>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Criterio de entrada:</strong> Entorno desplegado, migraciones/esquema PostgreSQL
+                            aplicados y datos semilla cargados.
+                        </li>
+                        <li>
+                            <strong>Criterio de salida:</strong> 100% de los casos críticos (autenticación, bloqueo de
+                            5 intentos, multi-empresa, roles, movimientos de stock, justificación de bajas y reportes)
+                            ejecutados sin defectos abiertos de severidad <strong>Crítica</strong> o
+                            <strong>Alta</strong>.
+                        </li>
+                    </ul>
+                    <div class="callout-note">
+                        <strong>Riesgos clave a vigilar:</strong> Desincronización de reloj o zona horaria entre
+                        servidor y PostgreSQL al evaluar <code>bloqueo_hasta</code> y expiración de códigos de
+                        recuperación (15 min), o fallos en el envío de correos SMTP en entornos de prueba sin
+                        credenciales externas configuradas.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 03: Plan de pruebas</div>
+    </footer>
+
+    <script src="../js/03-plan-pruebas.js"></script>
+</body>
+
+</html>

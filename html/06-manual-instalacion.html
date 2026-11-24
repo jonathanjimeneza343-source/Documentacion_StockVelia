@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>06. Manual de Instalación — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/06-manual-instalacion.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 06 • Guía técnica de despliegue y puesta en marcha</span>
+            <h1>Manual de Instalación completo de StockVelia</h1>
+            <p class="doc-subtitle">
+                Guía exhaustiva paso a paso para preparar requisitos del sistema, instalar y configurar PostgreSQL,
+                desplegar el Backend (Node.js/Express) y el Frontend (React), configurar variables de entorno y
+                verificar la salud del sistema.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia Multi-Empresa</span>
+                <span class="meta-pill">Backend: Node.js + Express + JWT + Nodemailer + Multer</span>
+                <span class="meta-pill">Frontend: React + jsPDF + CSV Export</span>
+                <span class="meta-pill">BD: PostgreSQL + Triggers y Restricciones</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Índice del Manual de Instalación">
+                <h2>Secciones</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Arquitectura y requisitos previos</a></li>
+                    <li><a href="#sec-2">2. Instalación y esquema PostgreSQL</a></li>
+                    <li><a href="#sec-3">3. Configuración y arranque del Backend</a></li>
+                    <li><a href="#sec-4">4. Configuración y arranque del Frontend</a></li>
+                    <li><a href="#sec-5">5. Variables de entorno y CORS/SMTP/Avatares</a></li>
+                    <li><a href="#sec-6">6. Verificación post-instalación</a></li>
+                    <li><a href="#sec-7">7. Solución de problemas comunes</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Arquitectura general y requisitos previos</h2>
+                    <p>
+                        <strong>StockVelia</strong> está estructurado como una aplicación web multi-empresa compuesta
+                        por tres capas principales: una base de datos relacional <strong>PostgreSQL</strong> (con tablas
+                        multi-tenant, restricciones <code>CHECK</code>, índices y trigger automático de stock), un
+                        <strong>Backend en Node.js / Express</strong> (autenticación JWT, revocación de sesión en lista
+                        negra, control de roles, transacciones con bloqueo de fila, carga de avatares y envío de
+                        correos) y un <strong>Frontend en React</strong> (interfaz por rol, selector de empresa, tema
+                        dinámico, filtros avanzados y exportación a PDF/CSV).
+                    </p>
+                    <h3>1.1 Requisitos del entorno y herramientas necesarias</h3>
+                    <div class="table-wrap">
+                        <table class="inst-table">
+                            <thead>
+                                <tr>
+                                    <th>Componente / Herramienta</th>
+                                    <th>Función en el despliegue</th>
+                                    <th>Verificación mínima</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Node.js (LTS) y npm</strong></td>
+                                    <td>Ejecución del servidor API Express, instalación de dependencias y
+                                        compilación/servidor del Frontend React.</td>
+                                    <td><code>node -v</code> y <code>npm -v</code> funcionales en terminal.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PostgreSQL</strong></td>
+                                    <td>Almacenamiento transaccional de empresas, usuarios, categorías, productos,
+                                        movimientos, códigos de recuperación, blacklist y auditoría.</td>
+                                    <td>Servicio PostgreSQL activo y acceso mediante <code>psql</code> o cliente SQL.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Git</strong></td>
+                                    <td>Clonación del repositorio y control de versiones de código fuente y scripts SQL.
+                                    </td>
+                                    <td><code>git --version</code> disponible.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cuenta / Servidor SMTP</strong></td>
+                                    <td>Envío de códigos de recuperación de contraseña de 6 dígitos mediante
+                                        Nodemailer.</td>
+                                    <td>Host SMTP, puerto, usuario y clave/contraseña de aplicación válidos.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Instalación y preparación de la base de datos PostgreSQL</h2>
+                    <p>
+                        Antes de iniciar la API, crea la base de datos y aplica el esquema, las restricciones, los
+                        índices, el trigger de stock y los roles iniciales:
+                    </p>
+                    <ol class="inst-steps">
+                        <li>
+                            <strong>Verificar que el servicio PostgreSQL esté en ejecución:</strong> asegúrate de que el
+                            motor esté arriba y escucha en el puerto configurado (habitualmente <code>5432</code>).
+                        </li>
+                        <li>
+                            <strong>Crear la base de datos de StockVelia:</strong> conéctate con <code>psql</code> (por
+                            ejemplo con usuario <code>postgres</code>) y crea la base de datos:
+                            <pre class="code-block"><code>CREATE DATABASE stockvelia;
+\c stockvelia</code></pre>
+                        </li>
+                        <li>
+                            <strong>Ejecutar el script de estructura, trigger e índices:</strong> aplica el archivo SQL
+                            del proyecto que define:
+                            <ul class="sub-list">
+                                <li>Tablas: <code>roles</code>, <code>empresa</code>, <code>usuario</code>,
+                                    <code>usuario_empresa</code>, <code>categorias</code>, <code>productos</code>,
+                                    <code>movimientos_inventario</code>, <code>codigos_recuperacion</code>,
+                                    <code>tokens_blacklist</code> y <code>auditoria</code>.
+                                </li>
+                                <li>Restricciones de integridad: precios y stocks no negativos, justificación
+                                    obligatoria en bajas/daños (<code>chk_justificacion_baja</code>) y estados válidos.
+                                </li>
+                                <li>Trigger y función de actualización atómica de stock
+                                    (<code>trg_actualizar_stock</code>) e índices de consulta.</li>
+                            </ul>
+                            <pre
+                                class="code-block"><code>psql -U postgres -d stockvelia -f database/schema.sql</code></pre>
+                        </li>
+                        <li>
+                            <strong>Sembrar los roles base del sistema:</strong> verifica que existan exactamente los
+                            tres roles esperados por el código:
+                            <pre class="code-block"><code>INSERT INTO public.roles (id_rol, nombre) VALUES
+  (1, 'Propietario'),
+  (2, 'Administrador Operativo'),
+  (3, 'Empleado')
+ON CONFLICT (id_rol) DO NOTHING;</code></pre>
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Instalación y arranque del Backend (Node.js / Express)</h2>
+                    <ol class="inst-steps">
+                        <li>
+                            <strong>Ubícate en la carpeta del backend e instala dependencias:</strong>
+                            <pre class="code-block"><code>cd backend
+npm install</code></pre>
+                        </li>
+                        <li>
+                            <strong>Crea y configura el archivo <code>.env</code></strong> a partir de la plantilla de
+                            entorno del proyecto (ver Sección 5).
+                        </li>
+                        <li>
+                            <strong>Verifica la carpeta de subida de avatares:</strong> asegúrate de que exista y tenga
+                            permisos de lectura/escritura la ruta destinada a las fotografías de perfil subidas por
+                            <code>POST /api/usuarios/perfil/foto</code>.
+                        </li>
+                        <li>
+                            <strong>Inicia el servidor Backend:</strong>
+                            <pre
+                                class="code-block"><code>npm run dev   # o npm start según scripts configurados en package.json</code></pre>
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Instalación y arranque del Frontend (React)</h2>
+                    <ol class="inst-steps">
+                        <li>
+                            <strong>Ubícate en la carpeta del frontend e instala dependencias:</strong>
+                            <pre class="code-block"><code>cd frontend
+npm install</code></pre>
+                        </li>
+                        <li>
+                            <strong>Configura la URL base de la API:</strong> define la variable de entorno del frontend
+                            apuntando al backend (por ejemplo, en <code>.env</code> o <code>.env.local</code> según tu
+                            configuración de bundler).
+                        </li>
+                        <li>
+                            <strong>Inicia el servidor de desarrollo o compila para producción:</strong>
+                            <pre class="code-block"><code>npm run dev      # Entorno de desarrollo
+npm run build    # Generación de artefactos estáticos para producción</code></pre>
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Variables de entorno, CORS, SMTP y carga de archivos</h2>
+                    <p>
+                        Revisa que todas estas variables y parámetros estén correctamente definidos antes de operar:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="inst-table">
+                            <thead>
+                                <tr>
+                                    <th>Parámetro / Variable</th>
+                                    <th>Propósito en StockVelia</th>
+                                    <th>Observación importante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Datos de conexión PostgreSQL</strong></td>
+                                    <td>Host, puerto, nombre de BD (<code>stockvelia</code>), usuario y contraseña para
+                                        el pool de conexión.</td>
+                                    <td>Usar credenciales con privilegios adecuados sobre la base de datos del sistema.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong><code>JWT_SECRET</code></strong></td>
+                                    <td>Firma y verificación de tokens JWT emitidos al iniciar sesión (vigencia de
+                                        <code>2h</code>).
+                                    </td>
+                                    <td>Debe ser una clave robusta y mantenerse privada en el servidor.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong><code>FRONTEND_URL</code> y CORS</strong></td>
+                                    <td>Define los orígenes permitidos para peticiones cross-origin desde el frontend
+                                        React.</td>
+                                    <td>Si hay múltiples orígenes, sepáralos o configúralos según el parser de CORS del
+                                        backend.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Variables SMTP / Correo</strong></td>
+                                    <td>Envío de códigos de 6 dígitos (vigencia de 15 minutos) para recuperación de
+                                        contraseña vía Nodemailer.</td>
+                                    <td>Sin credenciales SMTP válidas, el flujo de recuperación por correo fallará.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Límite y formatos de avatar</strong></td>
+                                    <td>Multer acepta <code>image/jpeg</code>, <code>image/jpg</code>,
+                                        <code>image/png</code> y <code>image/webp</code> hasta <strong>2 MB</strong>.
+                                    </td>
+                                    <td>Verifica que el directorio de destino sea accesible tanto en escritura como en
+                                        lectura.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 6 -->
+                <section class="doc-block" id="sec-6">
+                    <h2>6. Verificación post-instalación</h2>
+                    <p>
+                        Completa esta lista de comprobación para confirmar que la instalación quedó lista:
+                    </p>
+                    <ol class="inst-steps">
+                        <li><strong>Registro inicial:</strong> Registra una empresa de prueba y verifica que el usuario
+                            inicial quede con rol <code>Propietario (1)</code> y que se registre auditoría.</li>
+                        <li><strong>Login y bloqueo:</strong> Inicia sesión con credenciales válidas, prueba el cierre
+                            de sesión (verificando invalidación del token en <code>tokens_blacklist</code>) y valida el
+                            bloqueo tras 5 intentos fallidos.</li>
+                        <li><strong>Catálogo y movimiento:</strong> Crea una categoría y un producto, registra una
+                            <code>ENTRADA</code> y una <code>SALIDA</code>/<code>BAJA</code>, y comprueba que el trigger
+                            actualice el stock y que una <code>BAJA</code> sin justificación sea rechazada.
+                        </li>
+                        <li><strong>Multi-empresa y reportes:</strong> Vincula o crea una segunda empresa con el mismo
+                            correo de Propietario, alterna desde el selector de empresa y descarga un reporte en PDF y
+                            CSV.</li>
+                    </ol>
+                </section>
+
+                <!-- SECCIÓN 7 -->
+                <section class="doc-block" id="sec-7">
+                    <h2>7. Solución de problemas comunes</h2>
+                    <ul class="inst-steps">
+                        <li>
+                            <strong>Error de conexión a PostgreSQL:</strong> Verifica que el servicio PostgreSQL esté
+                            iniciado, que el puerto y credenciales coincidan con el entorno y que la base de datos
+                            <code>stockvelia</code> exista.
+                        </li>
+                        <li>
+                            <strong>Error CORS o 401/403 en peticiones desde el navegador:</strong> Revisa que
+                            <code>FRONTEND_URL</code> incluya el origen exacto donde corre React y que la cabecera
+                            <code>Authorization: Bearer &lt;token&gt;</code> se envíe en rutas protegidas.
+                        </li>
+                        <li>
+                            <strong>Fallo al subir foto de perfil:</strong> Confirma que el archivo sea JPG, JPEG, PNG o
+                            WEBP, no supere los <strong>2 MB</strong> y que el directorio de subida tenga permisos de
+                            escritura.
+                        </li>
+                        <li>
+                            <strong>Correo de recuperación no llega:</strong> Revisa los datos SMTP, el puerto/TLS y la
+                            carpeta de spam; recuerda que el código de 6 dígitos expira a los <strong>15
+                                minutos</strong>.
+                        </li>
+                    </ul>
+                    <div class="note-box">
+                        <strong>Listo para producción o pruebas:</strong> Una vez superadas estas verificaciones,
+                        conserva tus copias de respaldo según el <em>Entregable 04 (Plan de respaldo)</em> y mantén
+                        protegido el archivo de variables de entorno.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 06: Manual de Instalación</div>
+    </footer>
+
+    <script src="../js/06-manual-instalacion.js"></script>
+</body>
+
+</html>

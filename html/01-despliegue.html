@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>01. Documentación del despliegue — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/01-despliegue.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 01 • Publicación, infraestructura y evidencias</span>
+            <h1>Documentación del despliegue de StockVelia</h1>
+            <p class="doc-subtitle">
+                Registro del despliegue en internet con evidencias visuales de Vercel (Frontend) y Render (Backend),
+                base de datos PostgreSQL en Supabase, variables de entorno, estado de pruebas e incidente de correo.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia</span>
+                <span class="meta-pill">Repo: jaiderovalle6 / StockVelia (main)</span>
+                <span class="meta-pill">Plataformas: Vercel · Render · Supabase</span>
+                <span class="meta-pill">Actualización: 23 de noviembre de 2026</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Índice de documentación del despliegue">
+                <h2>Secciones</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Objetivo y alcance</a></li>
+                    <li><a href="#sec-2">2. Arquitectura y repositorio</a></li>
+                    <li><a href="#sec-3">3. Frontend en Vercel y Backend en Render</a></li>
+                    <li><a href="#sec-4">4. Base de datos en Supabase y variables</a></li>
+                    <li><a href="#sec-5">5. Pruebas e incidente SMTP</a></li>
+                    <li><a href="#sec-6">6. Seguridad, checklist y pendientes</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Objetivo y alcance</h2>
+                    <p>
+                        Este documento registra el proceso de publicación de <strong>StockVelia</strong> como aplicación
+                        web
+                        accesible por internet, orientada a pequeños negocios como tiendas, minimercados y misceláneas.
+                        Describe las plataformas utilizadas, las configuraciones identificadas en las capturas de
+                        <strong>Vercel</strong> y <strong>Render</strong>, y el estado funcional informado durante las
+                        pruebas (no se recibieron capturas del panel de <strong>Supabase</strong>).
+                    </p>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Arquitectura desplegada y estructura del repositorio</h2>
+                    <p>
+                        La arquitectura separa la interfaz, la lógica del servidor y el almacenamiento de datos: el
+                        navegador carga la aplicación en <strong>Vercel</strong> (React), el frontend envía solicitudes
+                        a la
+                        API en <strong>Render</strong> (Node.js + Express) y el backend consulta o modifica los datos en
+                        <strong>Supabase</strong> (PostgreSQL).
+                    </p>
+                    <div class="table-wrap">
+                        <table class="deploy-table">
+                            <thead>
+                                <tr>
+                                    <th>Capa</th>
+                                    <th>Plataforma / Tecnología</th>
+                                    <th>Función en el sistema</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Frontend</strong></td>
+                                    <td>Vercel · React</td>
+                                    <td>Publica la interfaz web con la que interactúa el usuario.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Backend</strong></td>
+                                    <td>Render · Node.js + Express</td>
+                                    <td>Ejecuta el servidor y expone los endpoints de la API.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Base de datos</strong></td>
+                                    <td>Supabase · PostgreSQL</td>
+                                    <td>Administra la base de datos relacional utilizada por el backend.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>
+                        En el repositorio <code>jaiderovalle6 / StockVelia</code> (rama <code>main</code>), Vercel
+                        detecta una estructura tipo monorepo con carpetas separadas para <code>backend</code> y
+                        <code>frontend</code>, lo que permite configurar la carpeta raíz correspondiente en cada
+                        plataforma.
+                    </p>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Despliegue del frontend en Vercel y del backend en Render</h2>
+                    <h3>3.1 Frontend en Vercel</h3>
+                    <ul class="deploy-list">
+                        <li>
+                            <strong>Importación y Root Directory:</strong> Se seleccionó el repositorio
+                            <code>StockVelia</code> (rama <code>main</code>) y se configuró
+                            <code>Root Directory = frontend</code>.
+                        </li>
+                        <li>
+                            <strong>Construcción:</strong> Se observa el preset <code>Create React App</code> y los
+                            campos de <em>Build Command</em>, <em>Output Directory</em> e <em>Install Command</em> con
+                            sugerencias predeterminadas (conviene confirmar si se mantuvieron o ajustaron al desplegar).
+                        </li>
+                        <li>
+                            <strong>Variable de entorno:</strong> Figura <code>REACT_APP_API_URL</code> (con valor
+                            oculto en la captura) para apuntar a la URL pública de Render y no a
+                            <code>localhost</code>. Cualquier cambio de variable en Vercel requiere un nuevo
+                            despliegue.
+                        </li>
+                    </ul>
+
+                    <h3>3.2 Backend en Render</h3>
+                    <ul class="deploy-list">
+                        <li>
+                            <strong>Tipo de servicio:</strong> Para un backend Node.js/Express que atiende peticiones
+                            HTTP corresponde un <strong>Web Service</strong>.
+                        </li>
+                        <li>
+                            <strong>Parámetros visibles en captura:</strong> Repositorio
+                            <code>jaiderovalle6 / StockVelia</code>, rama <code>main</code>, lenguaje
+                            <code>Node</code>, región <code>Ohio (US East)</code>, <em>Build Command</em>
+                            <code>yarn</code> y <em>Start Command</em> <code>yarn start</code>.
+                        </li>
+                        <li>
+                            <strong>Root Directory y plan:</strong> El campo <em>Root Directory</em> aparece vacío en la
+                            captura, por lo que debe verificarse si los comandos se ejecutan desde la raíz o desde
+                            <code>backend</code> donde reside el <code>package.json</code> del servidor. Asimismo, la
+                            tarifa de <code>$7/month</code> visible en la captura debe confirmarse en el panel actual
+                            de Render.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Base de datos en Supabase y variables de entorno</h2>
+                    <p>
+                        <strong>Supabase</strong> aloja la base de datos PostgreSQL de StockVelia, a la cual se
+                        conecta el backend de Render mediante variables de entorno privadas. Al no contar con capturas
+                        de Supabase, el nombre del proyecto, región, método de conexión, tablas y valores exactos quedan
+                        pendientes de incorporar.
+                    </p>
+                    <div class="table-wrap">
+                        <table class="deploy-table">
+                            <thead>
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Variable / Dato</th>
+                                    <th>Finalidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Vercel</strong></td>
+                                    <td><code>REACT_APP_API_URL</code></td>
+                                    <td>URL base del backend/API (visible en captura; valor oculto).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Render</strong></td>
+                                    <td><code>DATABASE_URL</code> o <code>DB_*</code></td>
+                                    <td>Conexión privada del backend con PostgreSQL (nombre real por verificar).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Render</strong></td>
+                                    <td><code>JWT_SECRET</code></td>
+                                    <td>Firma de tokens si la autenticación utiliza JWT.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Render</strong></td>
+                                    <td><code>CLIENT_URL</code> / <code>FRONTEND_URL</code></td>
+                                    <td>Origen permitido para CORS si el código lo requiere.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Render</strong></td>
+                                    <td><code>EMAIL_USER</code> / <code>EMAIL_PASS</code></td>
+                                    <td>Credenciales SMTP utilizadas para envío de correo.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Estado de pruebas e incidente de recuperación de contraseña</h2>
+                    <div class="table-wrap">
+                        <table class="deploy-table">
+                            <thead>
+                                <tr>
+                                    <th>Componente / Prueba</th>
+                                    <th>Estado</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Frontend en Vercel</strong></td>
+                                    <td><span class="status-ok">Desplegado</span></td>
+                                    <td>La aplicación está publicada.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Backend en Render</strong></td>
+                                    <td><span class="status-ok">Desplegado</span></td>
+                                    <td>La API está publicada.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Base de datos en Supabase</strong></td>
+                                    <td><span class="status-ok">Configurada</span></td>
+                                    <td>PostgreSQL es la base de datos utilizada.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Registro</strong></td>
+                                    <td><span class="status-ok">Funcionando</span></td>
+                                    <td>Se confirmó que permite registrar usuarios.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Inicio de sesión</strong></td>
+                                    <td><span class="status-ok">Funcionando</span></td>
+                                    <td>Se confirmó que permite iniciar sesión.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Recuperación de contraseña</strong></td>
+                                    <td><span class="status-warn">Pendiente</span></td>
+                                    <td>La solicitud presenta errores al enviar el correo.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>5.1 Incidente SMTP en Render Free</h3>
+                    <p>
+                        Al probar la recuperación de contraseña con Nodemailer y la cuenta
+                        <code>stockvelia7@gmail.com</code> hacia <code>smtp.gmail.com</code> (probando puerto 465 con
+                        <code>secure: true</code> y luego puerto 587 con <code>secure: false</code> y
+                        <code>family: 4</code>), los logs de Render reportaron <code>ENETUNREACH</code> y
+                        <code>Connection timeout</code>. Render restringe el SMTP saliente en servicios gratuitos para
+                        los puertos 25, 465 y 587, por lo que cambiar puerto o forzar IPv4 no resuelve la restricción
+                        de red del plan.
+                    </p>
+                    <ul class="deploy-list">
+                        <li>
+                            <strong>Opción 1:</strong> Mantener Render Free e integrar un proveedor de correo vía API
+                            HTTPS (como Resend, verificando dominio para envío a cualquier usuario en producción).
+                        </li>
+                        <li>
+                            <strong>Opción 2:</strong> Evaluar un plan de pago en Render que permita SMTP saliente y
+                            conservar Nodemailer con Gmail, verificando precios y condiciones vigentes.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 6 -->
+                <section class="doc-block" id="sec-6">
+                    <h2>6. Seguridad, lista de verificación y datos pendientes</h2>
+                    <ul class="deploy-list">
+                        <li>
+                            <strong>Seguridad:</strong> No subir secretos ni archivos <code>.env</code> al repositorio
+                            (usar <code>.gitignore</code>), no exponer secretos de Supabase o JWT en el frontend,
+                            restringir CORS a los orígenes necesarios, evitar imprimir tokens o contraseñas en logs y
+                            redesplegar tras cambiar variables de entorno.
+                        </li>
+                        <li>
+                            <strong>Checklist pendiente de validar:</strong> Confirmar <em>Root Directory</em> y
+                            comandos finales de build/start en Render, verificar CORS hacia Vercel, probar registro e
+                            inicio de sesión en producción y validar la recuperación de contraseña con el proveedor de
+                            correo definitivo.
+                        </li>
+                    </ul>
+                    <div class="deploy-note">
+                        <strong>Datos pendientes para completar la bitácora:</strong> Capturas de Supabase (sin
+                        exponer claves ni contraseñas), URLs públicas de Vercel y Render, confirmación final de
+                        <em>Root Directory</em> y comandos en Render, nombres exactos de variables de entorno y captura
+                        de despliegue exitoso / logs de inicio del backend.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 01: Documentación del despliegue</div>
+    </footer>
+
+    <script src="../js/01-despliegue.js"></script>
+</body>
+
+</html>

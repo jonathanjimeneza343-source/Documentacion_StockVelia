@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>02. Documentación de requisitos corregida — StockVelia</title>
+    <link rel="icon" type="image/png" href="../img/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../css/entregables.css" />
+    <link rel="stylesheet" href="../css/02-requisitos.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a href="index.html" class="brand-link">
+                <img src="../img/logo.png" alt="Logo de StockVelia" class="brand-logo" />
+                <span>StockVelia</span>
+            </a>
+            <a href="index.html#entregables" class="back-link">← Volver a entregables</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="doc-header">
+            <span class="doc-tag">Entregable 02 • Especificación técnica alineada al código</span>
+            <h1>Documentación de requisitos corregida y ajustada a la realidad actual</h1>
+            <p class="doc-subtitle">
+                Reconciliación integral entre la documentación inicial y el código real de Backend (Node.js/Express),
+                Frontend (React) y Base de Datos (PostgreSQL) del sistema StockVelia.
+            </p>
+            <div class="doc-meta-strip">
+                <span class="meta-pill">Sistema: StockVelia Multi-Empresa</span>
+                <span class="meta-pill">Stack: React · Node/Express · PostgreSQL</span>
+                <span class="meta-pill">Roles: Propietario (1) · Admin Operativo (2) · Empleado (3)</span>
+                <span class="meta-pill">Actualización: 23 de noviembre de 2026</span>
+            </div>
+        </section>
+
+        <div class="doc-layout">
+            <aside class="doc-nav" aria-label="Navegación de secciones">
+                <h2>Secciones</h2>
+                <ul>
+                    <li><a href="#sec-1" class="active is-current">1. Alcance, roles y multi-empresa</a></li>
+                    <li><a href="#sec-2">2. Requisitos funcionales (RF)</a></li>
+                    <li><a href="#sec-3">3. Reglas de negocio (RN)</a></li>
+                    <li><a href="#sec-4">4. Requisitos no funcionales (RNF)</a></li>
+                    <li><a href="#sec-5">5. Trazabilidad, brechas y supuestos</a></li>
+                </ul>
+            </aside>
+
+            <div class="doc-sections">
+                <!-- SECCIÓN 1 -->
+                <section class="doc-block" id="sec-1">
+                    <h2>1. Alcance, roles y contexto multi-empresa</h2>
+                    <p>
+                        Esta especificación corrige y actualiza los requisitos de <strong>StockVelia</strong> para
+                        reflejar con fidelidad lo implementado en el código fuente y en la base de datos relacional
+                        PostgreSQL, eliminando supuestos desactualizados del borrador inicial (como el rol genérico de
+                        "Operador" sin distinción jerárquica, la ausencia de soporte multi-empresa, la suposición de un
+                        borrado físico o estados booleanos en productos/usuarios, y la mención a WebSockets activos
+                        cuando el código actual emplea sincronización periódica por sondeo/polling y recarga
+                        contextual).
+                    </p>
+
+                    <h3>1.1 Jerarquía de roles y alcance operativo</h3>
+                    <p>
+                        El sistema opera con tres roles definidos en la tabla <code>public.roles</code> y validados
+                        tanto en el middleware <code>verificarRol</code> del backend como en las vistas del frontend:
+                    </p>
+
+                    <div class="table-wrap">
+                        <table class="req-table">
+                            <thead>
+                                <tr>
+                                    <th>Rol (ID)</th>
+                                    <th>Alcance de gestión y permisos en el código actual</th>
+                                    <th>Restricciones y límites</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Propietario</strong><br><span class="code-badge">id_rol = 1</span></td>
+                                    <td>
+                                        Se asigna automáticamente al registrar una nueva empresa y usuario inicial
+                                        (<code>POST /api/auth/register</code>). Puede crear nuevas empresas asociadas a
+                                        su cuenta, alternar entre empresas (<code>POST /api/auth/change-company</code>),
+                                        personalizar el color de tema de la empresa
+                                        (<code>PUT /api/usuarios/empresa/color</code>), gestionar Administradores
+                                        Operativos y Empleados, y acceder a todos los módulos (Dashboard, Productos,
+                                        Categorías, Movimientos, Usuarios, Reportes y Mi Perfil).
+                                    </td>
+                                    <td>
+                                        Ningún otro usuario puede modificar su rol ni suspenderlo o darle de baja desde
+                                        el panel administrativo. Para asociar una empresa adicional usando un correo ya
+                                        registrado con rol Propietario, debe autenticarse con su contraseña actual.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Administrador Operativo</strong><br><span class="code-badge">id_rol =
+                                            2</span></td>
+                                    <td>
+                                        Gestiona el catálogo de productos (crear, editar, baja lógica), categorías
+                                        (crear, editar, eliminar si no tienen productos vinculados), movimientos de
+                                        inventario, reportes de inventario y movimientos de su empresa activa, y
+                                        administra únicamente cuentas de <strong>Empleados</strong> (crear, editar,
+                                        activar/suspender, baja lógica).
+                                    </td>
+                                    <td>
+                                        No puede crear nuevas empresas, cambiar el color de tema de la empresa,
+                                        promover/degradar roles ni gestionar a otros Administradores Operativos o al
+                                        Propietario (responde <code>403 Forbidden</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Empleado</strong><br><span class="code-badge">id_rol = 3</span></td>
+                                    <td>
+                                        Accede al Dashboard, consulta el catálogo de productos con filtros, crea
+                                        productos (<code>POST /api/productos</code>) y categorías
+                                        (<code>POST /api/categorias</code>), registra movimientos de inventario
+                                        (<code>POST /api/movimientos</code>) y consulta/edita su propio perfil personal.
+                                    </td>
+                                    <td>
+                                        En la interfaz (<code>Sidebar</code> y <code>Dashboard</code>) no se muestran
+                                        las secciones de <strong>Usuarios</strong> ni <strong>Reportes</strong>, y en el
+                                        backend no puede editar ni desactivar productos
+                                        (<code>PUT/DELETE /api/productos/:id</code> exigen roles 1 o 2).
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>1.2 Aislamiento multi-empresa (multi-tenant) y sincronización</h3>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Aislamiento por empresa activa:</strong> Cada token JWT transporta
+                            <code>id_usuario</code>, <code>id_empresa</code> e <code>id_rol</code>. Las consultas de
+                            categorías, productos, movimientos y reportes filtran por <code>id_empresa</code>,
+                            impidiendo que datos de una compañía se mezclen con los de otra.
+                        </li>
+                        <li>
+                            <strong>Selector de empresa:</strong> Cuando un Propietario tiene más de una empresa
+                            vinculada (vía <code>usuario_empresa</code>), al iniciar sesión se despliega
+                            <code>ModalSeleccionarEmpresa</code> y, dentro del Dashboard, el <code>Header</code> permite
+                            cambiar de empresa o registrar una nueva.
+                        </li>
+                        <li>
+                            <strong>Sincronización en pantalla:</strong> El código actual actualiza vistas clave
+                            (<code>InicioDashboard</code>, <code>Productos</code>, <code>Movimientos</code>) mediante
+                            consulta inmediata tras cada acción y un intervalo de refresco automático cada
+                            <code>15000 ms</code> (15 segundos), más recarga al cambiar de empresa activa.
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- SECCIÓN 2 -->
+                <section class="doc-block" id="sec-2">
+                    <h2>2. Requisitos funcionales corregidos (RF)</h2>
+                    <p>
+                        A continuación se detallan los requisitos funcionales ajustados a los controladores, rutas,
+                        componentes y esquema SQL vigentes:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="req-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Módulo</th>
+                                    <th>Requisito</th>
+                                    <th>Especificación corregida según implementación real</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>RF-01</strong></td>
+                                    <td>Autenticación y Multi-Empresa</td>
+                                    <td>Registro de empresa y usuario / Vinculación multi-empresa</td>
+                                    <td>
+                                        Permite registrar una empresa y su usuario inicial con rol
+                                        <strong>Propietario</strong> (<code>id_rol = 1</code>), asignando color
+                                        hexadecimal (por defecto <code>#6D28D9</code> en backend o
+                                        <code>#5e059e</code> en UI). Si el correo ya existe con rol Propietario activo y
+                                        la contraseña coincide, vincula una nueva empresa a su cuenta y registra
+                                        auditoría (<code>CREAR_EMPRESA_ADICIONAL</code> o <code>REGISTRO</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-02</strong></td>
+                                    <td>Autenticación y Seguridad</td>
+                                    <td>Inicio de sesión con JWT y bloqueo progresivo</td>
+                                    <td>
+                                        Valida correo (normalizado en minúsculas) y contraseña con
+                                        <code>bcrypt.compare</code>. Verifica que el usuario tenga estado
+                                        <code>ACTIVO</code> y no supere el bloqueo temporal. Tras <strong>5 intentos
+                                            fallidos</strong> consecutivos (nota: en el borrador inicial se mencionaban
+                                        3),
+                                        establece <code>bloqueo_hasta</code> por <strong>15 minutos</strong> y responde
+                                        <code>423 Locked</code>. Emite JWT con expiración de <code>2h</code> y registra
+                                        <code>LOGIN</code> en auditoría.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-03</strong></td>
+                                    <td>Autenticación y Seguridad</td>
+                                    <td>Recuperación y restablecimiento de contraseña</td>
+                                    <td>
+                                        Genera un código numérico aleatorio de 6 dígitos con validez de <strong>15
+                                            minutos</strong> en <code>codigos_recuperacion</code> y lo envía por correo
+                                        vía Nodemailer usando la plantilla HTML de recuperación. Al restablecer, valida
+                                        vigencia y coincidencia del código (eliminando el código si es incorrecto o ha
+                                        expirado), aplica hash con Bcrypt, reinicia <code>intentos_fallidos = 0</code>
+                                        y limpia <code>bloqueo_hasta</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-04</strong></td>
+                                    <td>Autenticación y Seguridad</td>
+                                    <td>Cierre de sesión y revocación de token</td>
+                                    <td>
+                                        Al cerrar sesión, el backend inserta el token JWT y su
+                                        <code>fecha_expiracion</code> en <code>tokens_blacklist</code> y el frontend
+                                        limpia <code>token</code> y <code>usuario</code> del <code>localStorage</code>.
+                                        El middleware <code>verificarToken</code> rechaza con <code>401</code> cualquier
+                                        token presente en la lista negra.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-05</strong></td>
+                                    <td>Gestión de Usuarios y Perfil</td>
+                                    <td>Administración jerárquica de usuarios</td>
+                                    <td>
+                                        Permite listar usuarios no eliminados de la empresa
+                                        (<code>estado &lt;&gt; 'ELIMINADO'</code>), crear usuarios con roles 2 o 3 (solo
+                                        el Propietario puede crear <code>Administrador Operativo</code>), editar datos
+                                        básicos o rol (impidiendo editar al Propietario o a usuarios no
+                                        <code>ACTIVO</code>), cambiar estado (<code>ACTIVO</code>,
+                                        <code>INACTIVO</code>)
+                                        y ejecutar baja lógica (<code>ELIMINADO</code>), bloqueando auto-suspensión o
+                                        baja del Propietario.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-06</strong></td>
+                                    <td>Gestión de Usuarios y Perfil</td>
+                                    <td>Perfil personal, avatar y color corporativo</td>
+                                    <td>
+                                        Permite consultar el perfil propio (<code>GET /api/usuarios/perfil</code>),
+                                        editar nombre, teléfono y contraseña (exigiendo contraseña actual válida
+                                        cuando se cambia clave), subir fotografía de perfil
+                                        (<code>POST /api/usuarios/perfil/foto</code> en formatos JPG, JPEG, PNG o WEBP
+                                        hasta 2 MB, eliminando el archivo anterior si existía) y, para el rol
+                                        Propietario, cambiar el <code>color_tema</code> de la empresa activa.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-07</strong></td>
+                                    <td>Catálogo y Categorías</td>
+                                    <td>Gestión de categorías por empresa</td>
+                                    <td>
+                                        Permite listar categorías de la empresa ordenadas alfabéticamente, crear
+                                        categorías verificando unicidad insensible a mayúsculas/minúsculas dentro de
+                                        la empresa (<code>LOWER(nombre)</code>), actualizarlas (roles 1 y 2) y
+                                        eliminarlas solo si no existen productos asociados en esa empresa.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-08</strong></td>
+                                    <td>Catálogo de Productos</td>
+                                    <td>Registro, edición y baja lógica de productos</td>
+                                    <td>
+                                        Permite crear productos validando pertenencia de la categoría a la empresa,
+                                        unicidad del <code>codigo</code> dentro de la empresa,
+                                        <code>precio &gt;= 0</code>, <code>stock</code> entero <code>&gt;= 0</code> y
+                                        <code>stock_minimo</code> entero <code>&gt;= 0</code> (por defecto
+                                        <code>5</code>). Permite actualizar atributos comerciales y
+                                        <code>stock_minimo</code> (roles 1 y 2), y realizar baja lógica estableciendo
+                                        <code>estado = 'INACTIVO'</code> sin borrar el historial.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-09</strong></td>
+                                    <td>Catálogo y Búsqueda</td>
+                                    <td>Consulta y filtrado multi-criterio en catálogo</td>
+                                    <td>
+                                        Lista productos activos (<code>estado = 'ACTIVO'</code>) de la empresa activa y
+                                        permite filtrar en la vista de Productos por texto (nombre o código),
+                                        categoría, estado de stock (bajo/crítico con
+                                        <code>stock &lt;= stock_minimo</code> o saludable con
+                                        <code>stock &gt; stock_minimo</code>) y rango de precios
+                                        (<code>precioMin</code> / <code>precioMax</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-10</strong></td>
+                                    <td>Inventario y Movimientos</td>
+                                    <td>Registro transaccional de entradas, salidas y bajas</td>
+                                    <td>
+                                        Registra movimientos de tipo <code>ENTRADA</code>, <code>SALIDA</code>
+                                        (normalizando también <code>VENTA</code>) o <code>BAJA</code> con cantidad
+                                        entera
+                                        <code>&gt; 0</code> sobre productos <code>ACTIVO</code> de la empresa. Exige
+                                        justificación u observación obligatoria cuando el tipo es <code>BAJA</code> o el
+                                        motivo corresponde a baja/daño/obsolescencia. Bloquea salidas o bajas cuando
+                                        el stock actual es menor que la cantidad solicitada.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-11</strong></td>
+                                    <td>Inventario y Alertas</td>
+                                    <td>Actualización automática de stock y alertas de stock bajo</td>
+                                    <td>
+                                        El trigger de base de datos <code>trg_actualizar_stock</code> recalcula de forma
+                                        atómica el <code>stock</code> en <code>public.productos</code> al insertar en
+                                        <code>movimientos_inventario</code> y actualiza
+                                        <code>fecha_actualizacion</code>. El backend calcula
+                                        <code>stock_bajo = (nuevoStock &lt;= minimoVigente)</code> y el frontend
+                                        resalta productos críticos en el Dashboard y Catálogo.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RF-12</strong></td>
+                                    <td>Reportes y Exportación</td>
+                                    <td>Reportes de inventario y movimientos con exportación</td>
+                                    <td>
+                                        Consulta el reporte de inventario activo y el historial de movimientos de la
+                                        empresa validando que el usuario pertenezca a la empresa solicitada. En el
+                                        frontend calcula totales de unidades y valoración económica
+                                        (<code>stock * precio</code>) global y por categoría, filtra movimientos por
+                                        rango de fechas y por producto, y exporta los datos filtrados a
+                                        <strong>PDF</strong> (<code>jsPDF</code> + <code>autoTable</code>) o
+                                        <strong>CSV/Excel</strong> (<code>.csv</code> con BOM UTF-8 y delimitador
+                                        <code>;</code>).
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 3 -->
+                <section class="doc-block" id="sec-3">
+                    <h2>3. Reglas de negocio (RN)</h2>
+                    <p>
+                        Las siguientes reglas de negocio rigen la integridad operativa, financiera y de seguridad del
+                        sistema:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="req-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Regla de negocio</th>
+                                    <th>Comportamiento exigido en aplicación y base de datos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>RN-01</strong></td>
+                                    <td>Aislamiento estricto por empresa (Multi-Tenant)</td>
+                                    <td>
+                                        Todo producto, categoría, movimiento y reporte pertenece a una
+                                        <code>id_empresa</code>. Intentar consultar reportes de otra empresa o alterar
+                                        stock de un producto de distinta empresa debe rechazarse con
+                                        <code>403 Forbidden</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RN-02</strong></td>
+                                    <td>Bloqueo temporal tras 5 intentos fallidos</td>
+                                    <td>
+                                        Cada contraseña incorrecta incrementa <code>intentos_fallidos</code>. Al
+                                        alcanzar 5 intentos, se fija <code>bloqueo_hasta = ahora + 15 minutos</code> y
+                                        se retorna <code>423</code>. Un inicio de sesión exitoso o el restablecimiento
+                                        de contraseña restablece el contador a <code>0</code> y limpia el bloqueo.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RN-03</strong></td>
+                                    <td>Política de fortaleza de contraseña</td>
+                                    <td>
+                                        Las contraseñas nuevas o de registro deben cumplir
+                                        <code>/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/</code> (mínimo 6 caracteres, al
+                                        menos una minúscula, una mayúscula y un dígito) y almacenarse cifradas con
+                                        Bcrypt.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RN-04</strong></td>
+                                    <td>No negatividad de stock, precio y stock mínimo</td>
+                                    <td>
+                                        En <code>productos</code> se exige <code>precio &gt;= 0</code>,
+                                        <code>stock &gt;= 0</code> y <code>stock_minimo &gt;= 0</code>. En
+                                        <code>SALIDA</code> y <code>BAJA</code>, ni el controlador ni el trigger
+                                        <code>actualizar_stock()</code> permiten que
+                                        <code>stock_actual - cantidad</code>
+                                        sea menor que cero.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RN-05</strong></td>
+                                    <td>Justificación obligatoria en bajas y daños</td>
+                                    <td>
+                                        Cuando <code>tipo_movimiento = 'BAJA'</code> o el motivo pertenece a
+                                        baja/daño/obsolescencia (<code>Baja/Daño</code>, <code>DANO</code>,
+                                        <code>OBSOLESCENCIA</code>, o motivos coincidentes en la interfaz), es
+                                        obligatoria una justificación u observación no vacía tanto en el controlador
+                                        como en la restricción <code>chk_justificacion_baja</code> de la BD.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RN-06</strong></td>
+                                    <td>Borrado lógico para preservar trazabilidad</td>
+                                    <td>
+                                        Los productos dados de baja pasan a <code>estado = 'INACTIVO'</code> y los
+                                        usuarios dados de baja pasan a <code>estado = 'ELIMINADO'</code> (con estados
+                                        adicionales <code>ACTIVO</code> e <code>INACTIVO</code>). No se eliminan
+                                        registros históricos de movimientos ni auditoría, y las categorías con productos
+                                        asociados no pueden eliminarse.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RN-07</strong></td>
+                                    <td>Auditoría transversal de operaciones</td>
+                                    <td>
+                                        Las operaciones relevantes (registro/vinculación de empresa, login,
+                                        creación/edición/eliminación de categorías y productos, registro de movimientos,
+                                        actualización de perfil/foto/color de empresa y gestión de usuarios) se
+                                        registran en la tabla <code>auditoria</code> mediante
+                                        <code>registrarAuditoria</code>.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 4 -->
+                <section class="doc-block" id="sec-4">
+                    <h2>4. Requisitos no funcionales (RNF)</h2>
+                    <p>
+                        Atributos de calidad, seguridad, compatibilidad y mantenibilidad definidos para la operación
+                        real de StockVelia:
+                    </p>
+                    <div class="table-wrap">
+                        <table class="req-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Categoría</th>
+                                    <th>Requisito no funcional</th>
+                                    <th>Criterio técnico y estado en el código</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>RNF-01</strong></td>
+                                    <td>Seguridad</td>
+                                    <td>Autenticación JWT y revocación de sesión</td>
+                                    <td>
+                                        Rutas protegidas mediante <code>verificarToken</code> con cabecera
+                                        <code>Authorization: Bearer &lt;token&gt;</code>, validación de firma con
+                                        <code>JWT_SECRET</code>, verificación en tiempo real del estado del usuario en
+                                        BD y consulta a <code>tokens_blacklist</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RNF-02</strong></td>
+                                    <td>Seguridad</td>
+                                    <td>Cifrado de contraseñas y control de acceso (RBAC)</td>
+                                    <td>
+                                        Hash de contraseñas mediante <code>bcrypt</code> con <code>genSalt(10)</code> y
+                                        control de roles mediante <code>verificarRol(...rolesPermitidos)</code> en rutas
+                                        sensibles.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RNF-03</strong></td>
+                                    <td>Seguridad</td>
+                                    <td>Protección de carga de archivos y CORS</td>
+                                    <td>
+                                        El middleware <code>subirAvatarMiddleware</code> (Multer) restringe la subida de
+                                        avatares a tipos MIME <code>image/jpeg</code>, <code>image/jpg</code>,
+                                        <code>image/png</code> y <code>image/webp</code> con límite de
+                                        <strong>2 MB</strong>. El servidor Express configura CORS con métodos y
+                                        cabeceras
+                                        explícitos y soporte para lista de orígenes permitidos en
+                                        <code>FRONTEND_URL</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RNF-04</strong></td>
+                                    <td>Integridad y Concurrencia</td>
+                                    <td>Transacciones ACID y bloqueo de fila</td>
+                                    <td>
+                                        El registro de movimientos ejecuta transacciones
+                                        <code>BEGIN / COMMIT / ROLLBACK</code> y bloqueo de fila <code>FOR UPDATE</code>
+                                        en <code>public.productos</code> para prevenir condiciones de carrera en
+                                        actualizaciones de stock.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RNF-05</strong></td>
+                                    <td>Rendimiento</td>
+                                    <td>Índices en PostgreSQL y consultas parametrizadas</td>
+                                    <td>
+                                        Todas las consultas SQL usan parámetros posicionales (<code>$1, $2...</code>)
+                                        para prevenir inyección SQL y se apoyan en índices sobre
+                                        <code>productos(id_empresa, estado)</code>,
+                                        <code>productos(id_categoria)</code>, <code>productos(nombre)</code>,
+                                        <code>movimientos_inventario(id_producto, fecha DESC)</code>,
+                                        <code>movimientos_inventario(id_empresa, fecha DESC)</code>,
+                                        <code>auditoria(id_empresa, fecha DESC)</code> y
+                                        <code>tokens_blacklist(fecha_expiracion)</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>RNF-06</strong></td>
+                                    <td>Usabilidad y Mantenibilidad</td>
+                                    <td>Interfaz adaptable, tema dinámico y modularidad</td>
+                                    <td>
+                                        Variables CSS dinámicas (<code>--color-primario</code> y
+                                        <code>--color-primario-hover</code>) aplicadas por empresa, diseño responsivo en
+                                        vistas y separación en capas (rutas, controladores, middlewares, servicios,
+                                        componentes y páginas).
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECCIÓN 5 -->
+                <section class="doc-block" id="sec-5">
+                    <h2>5. Trazabilidad, brechas detectadas y supuestos</h2>
+                    <p>
+                        Esta sección documenta las diferencias encontradas entre los documentos previos y el
+                        código/esquema actual, junto con los supuestos vigentes.
+                    </p>
+                    <h3>5.1 Brechas corregidas frente a la documentación anterior</h3>
+                    <ul class="detail-list">
+                        <li>
+                            <strong>Umbral de bloqueo por intentos fallidos:</strong> La documentación previa indicaba 3
+                            intentos fallidos; el controlador <code>authController.js</code> bloquea temporalmente por
+                            15 minutos al alcanzar <strong>5 intentos fallidos</strong>
+                            (<code>nuevosIntentos &gt;= 5</code>).
+                        </li>
+                        <li>
+                            <strong>Roles del sistema:</strong> En lugar de un único "Operador" genérico, el sistema
+                            implementa tres roles: <strong>Propietario (1)</strong>, <strong>Administrador Operativo
+                                (2)</strong> y <strong>Empleado (3)</strong>.
+                        </li>
+                        <li>
+                            <strong>Tipos de datos y estados en BD:</strong> El esquema SQL vigente usa claves primarias
+                            seriales (<code>SERIAL</code>/<code>INTEGER</code>) y estados de texto
+                            (<code>'ACTIVO'</code>, <code>'INACTIVO'</code>, <code>'ELIMINADO'</code> en usuarios;
+                            <code>'ACTIVO'</code>, <code>'INACTIVO'</code> en productos; booleano en
+                            <code>empresa.estado</code>), corrigiendo el borrador que mencionaba IDs
+                            <code>VARCHAR(20)</code> o estado booleano en productos.
+                        </li>
+                        <li>
+                            <strong>Tiempo real:</strong> Aunque el borrador mencionaba WebSockets (Socket.io), el
+                            código revisado realiza actualización inmediata tras cada operación y refresco automático
+                            periódico por intervalo (15 segundos) en las vistas del Dashboard, Productos y Movimientos.
+                        </li>
+                        <li>
+                            <strong>Exportación a Excel:</strong> En el módulo de Reportes del frontend actual, la
+                            exportación de hoja de cálculo genera un archivo <strong>CSV</strong> (<code>.csv</code> con
+                            BOM UTF-8 y separador punto y coma <code>;</code>), compatible con Excel, además de la
+                            descarga en <strong>PDF</strong>.
+                        </li>
+                    </ul>
+                    <div class="callout-note">
+                        <strong>Supuesto operativo vigente:</strong> La base de datos PostgreSQL cuenta con los roles
+                        iniciales sembrados (<code>1: Propietario</code>, <code>2: Administrador Operativo</code>,
+                        <code>3: Empleado</code>) y las variables de entorno (<code>JWT_SECRET</code>, credenciales de
+                        PostgreSQL y correo SMTP) están configuradas en el entorno de ejecución.
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="doc-footer">
+        <div class="container">StockVelia • Entregable 02: Documentación de requisitos corregida</div>
+    </footer>
+
+    <script src="../js/02-requisitos.js"></script>
+</body>
+
+</html>

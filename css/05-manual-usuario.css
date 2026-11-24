@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Estilos específicos para Entregable 05: Manual de Usuario
+   Compatible con css/entregables.css (paleta #5E059D / #470378 / #F8F8FC)
+   ========================================================================== */
+
+:root {
+    --man-primary: #5e059d;
+    --man-primary-dark: #470378;
+    --man-primary-soft: #f4ebff;
+    --man-border: #e6d7f5;
+    --man-text: #2d1142;
+    --man-muted: #665b73;
+    --man-surface: #ffffff;
+    --man-surface-alt: #f8f8fc;
+}
+
+.doc-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: clamp(0.74rem, 1.4vw, 0.8rem);
+    font-weight: 600;
+    background-color: var(--man-primary-soft);
+    color: var(--man-primary-dark);
+    border: 1px solid rgba(94, 5, 157, 0.18);
+    max-width: 100%;
+}
+
+.doc-block h3 {
+    margin-top: 22px;
+    margin-bottom: 10px;
+    font-size: clamp(1rem, 1.8vw, 1.12rem);
+    font-weight: 700;
+    color: var(--man-primary-dark);
+}
+
+.doc-block p {
+    color: var(--man-text);
+    line-height: 1.68;
+    margin-bottom: 12px;
+    font-size: clamp(0.9rem, 1.5vw, 0.96rem);
+}
+
+.step-list {
+    margin: 10px 0 16px 22px;
+    padding: 0;
+    color: var(--man-text);
+    line-height: 1.65;
+    font-size: clamp(0.88rem, 1.5vw, 0.94rem);
+}
+
+.step-list li {
+    margin-bottom: 10px;
+}
+
+.table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 14px 0 18px;
+    border: 1px solid var(--man-border);
+    border-radius: 12px;
+    background-color: var(--man-surface);
+}
+
+.manual-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+    font-size: clamp(0.82rem, 1.4vw, 0.89rem);
+}
+
+.manual-table thead {
+    background-color: var(--man-primary);
+    color: #ffffff;
+}
+
+.manual-table th {
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.manual-table td {
+    padding: 12px 14px;
+    border-top: 1px solid var(--man-border);
+    vertical-align: top;
+    line-height: 1.55;
+    color: var(--man-text);
+}
+
+.manual-table tbody tr:nth-child(even) {
+    background-color: var(--man-surface-alt);
+}
+
+.manual-table tbody tr:hover {
+    background-color: #faf5ff;
+}
+
+.role-chip {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    background-color: #ede9fe;
+    color: var(--man-primary-dark);
+}
+
+.info-box {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--man-primary);
+    border-radius: 10px;
+    background-color: var(--man-primary-soft);
+    color: var(--man-text);
+    font-size: clamp(0.86rem, 1.4vw, 0.92rem);
+    line-height: 1.6;
+}
+
+.doc-nav a.is-current,
+.doc-nav a.active {
+    color: var(--man-primary-dark);
+    font-weight: 700;
+    background-color: var(--man-primary-soft);
+    border-radius: 8px;
+}
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .doc-nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .doc-nav a {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 600px) {
+    .manual-table {
+        min-width: 520px;
+        font-size: 0.82rem;
+    }
+
+    .manual-table th,
+    .manual-table td {
+        padding: 10px 11px;
+    }
+
+    .info-box {
+        padding: 12px 14px;
+    }
+}

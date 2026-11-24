@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Estilos específicos para Entregable 02: Documentación de Requisitos
+   Compatible con css/entregables.css (paleta #5E059D / #470378 / #F8F8FC)
+   ========================================================================== */
+
+:root {
+    --req-primary: #5e059d;
+    --req-primary-dark: #470378;
+    --req-primary-soft: #f4ebff;
+    --req-border: #e6d7f5;
+    --req-text: #2d1142;
+    --req-muted: #665b73;
+    --req-surface: #ffffff;
+    --req-surface-alt: #f8f8fc;
+}
+
+.doc-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: clamp(0.74rem, 1.4vw, 0.8rem);
+    font-weight: 600;
+    background-color: var(--req-primary-soft);
+    color: var(--req-primary-dark);
+    border: 1px solid rgba(94, 5, 157, 0.18);
+    max-width: 100%;
+}
+
+.doc-block h3 {
+    margin-top: 22px;
+    margin-bottom: 10px;
+    font-size: clamp(1rem, 1.8vw, 1.12rem);
+    font-weight: 700;
+    color: var(--req-primary-dark);
+}
+
+.doc-block p {
+    color: var(--req-text);
+    line-height: 1.68;
+    margin-bottom: 12px;
+    font-size: clamp(0.9rem, 1.5vw, 0.96rem);
+}
+
+.detail-list {
+    margin: 10px 0 16px 20px;
+    padding: 0;
+    color: var(--req-text);
+    line-height: 1.65;
+    font-size: clamp(0.88rem, 1.5vw, 0.94rem);
+}
+
+.detail-list li {
+    margin-bottom: 10px;
+}
+
+.table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 14px 0 18px;
+    border: 1px solid var(--req-border);
+    border-radius: 12px;
+    background-color: var(--req-surface);
+}
+
+.req-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 660px;
+    font-size: clamp(0.82rem, 1.4vw, 0.89rem);
+}
+
+.req-table thead {
+    background-color: var(--req-primary);
+    color: #ffffff;
+}
+
+.req-table th {
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.req-table td {
+    padding: 12px 14px;
+    border-top: 1px solid var(--req-border);
+    vertical-align: top;
+    line-height: 1.55;
+    color: var(--req-text);
+}
+
+.req-table tbody tr:nth-child(even) {
+    background-color: var(--req-surface-alt);
+}
+
+.req-table tbody tr:hover {
+    background-color: #faf5ff;
+}
+
+.code-badge {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    background-color: #ede9fe;
+    color: var(--req-primary-dark);
+}
+
+.callout-note {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--req-primary);
+    border-radius: 10px;
+    background-color: var(--req-primary-soft);
+    color: var(--req-text);
+    font-size: clamp(0.86rem, 1.4vw, 0.92rem);
+    line-height: 1.6;
+}
+
+.doc-nav a.is-current,
+.doc-nav a.active {
+    color: var(--req-primary-dark);
+    font-weight: 700;
+    background-color: var(--req-primary-soft);
+    border-radius: 8px;
+}
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .doc-nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .doc-nav a {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+}
+
+/* Móviles */
+@media (max-width: 600px) {
+    .req-table {
+        min-width: 540px;
+        font-size: 0.82rem;
+    }
+
+    .req-table th,
+    .req-table td {
+        padding: 10px 11px;
+    }
+
+    .callout-note {
+        padding: 12px 14px;
+    }
+}
